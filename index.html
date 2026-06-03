@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M-SKT Bütünleşik Süreç Analizi & Tasarım Sunumu</title>
+    <title>M-SKT Gereksinim Mühendisliği & Analiz Sunumu</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -102,26 +102,15 @@
             color: var(--text-primary);
         }
 
-        .roles-container {
-            display: flex;
-            gap: 8px;
-        }
-
-        .role-indicator-badge {
-            font-size: 0.72rem;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 15px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid var(--border-color);
-            color: var(--text-secondary);
-            transition: var(--transition);
-        }
-
-        .role-indicator-badge.active {
-            background: rgba(255, 130, 0, 0.15);
+        .role-badge {
+            background: rgba(255, 130, 0, 0.12);
             color: var(--migros-orange);
-            border-color: rgba(255, 130, 0, 0.35);
+            border: 1px solid rgba(255, 130, 0, 0.25);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
         }
 
         /* --- Slide Container --- */
@@ -134,9 +123,8 @@
             position: relative;
             z-index: 5;
             width: 100%;
-            max-width: 1350px;
+            max-width: 1300px;
             margin: 0 auto;
-            overflow: hidden;
         }
 
         .slide {
@@ -160,9 +148,8 @@
         .slide-content-grid {
             display: grid;
             grid-template-columns: 380px 1fr;
-            gap: 2.5rem;
+            gap: 3rem;
             align-items: center;
-            height: 100%;
         }
 
         /* --- Custom UI Components --- */
@@ -280,13 +267,11 @@
         .must { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.25); }
         .should { background: rgba(14, 165, 233, 0.15); color: var(--info); border: 1px solid rgba(14, 165, 233, 0.25); }
         .could { background: rgba(245, 158, 11, 0.15); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.25); }
-        .danger-label { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.25); }
-        .success-label { background: rgba(16, 185, 129, 0.15); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.25); }
 
         /* --- Scrollbars --- */
         .scrollable-content {
             overflow-y: auto;
-            max-height: 480px;
+            max-height: 460px;
             padding-right: 8px;
         }
         .scrollable-content::-webkit-scrollbar {
@@ -303,7 +288,7 @@
         /* Cover Slide Specific Styles */
         .cover-layout {
             text-align: center;
-            max-width: 850px;
+            max-width: 800px;
             margin: 0 auto;
         }
 
@@ -412,7 +397,7 @@
         /* --- Custom Grid Layouts for Content --- */
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
             gap: 1.2rem;
         }
 
@@ -445,6 +430,41 @@
             line-height: 1.5;
         }
 
+        /* User Story Layout */
+        .user-story-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-color);
+            border-radius: 14px;
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+            transition: var(--transition);
+            border-left: 4px solid var(--migros-orange);
+        }
+        .user-story-card:hover {
+            transform: translateX(5px);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .user-story-title {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .user-story-title i {
+            color: var(--migros-orange);
+        }
+        .user-story-body {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+        .user-story-body strong {
+            color: #fff;
+        }
+
         /* Given-When-Then blocks */
         .gherkin-container {
             display: flex;
@@ -459,6 +479,15 @@
             font-size: 0.78rem;
             border: 1px solid rgba(255,255,255,0.03);
             box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            position: relative;
+        }
+        .gherkin-card::after {
+            content: "GHERKIN TEST CASE";
+            position: absolute;
+            top: 10px; right: 15px;
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            letter-spacing: 0.5px;
         }
         .gherkin-line {
             margin-bottom: 4px;
@@ -561,105 +590,6 @@
             background: rgba(255, 130, 0, 0.06);
         }
 
-        /* Mockup screens */
-        .mockup-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-        .mockup-screen {
-            background: #090d16;
-            border: 1.5px solid var(--border-color);
-            border-radius: 14px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 0.68rem;
-            padding: 1.2rem;
-            color: #cbd5e1;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-            line-height: 1.4;
-        }
-        .mockup-title {
-            color: var(--migros-orange);
-            font-weight: 700;
-            border-bottom: 1.5px solid var(--border-color);
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-            font-size: 0.72rem;
-        }
-        .mockup-alert {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1.5px solid var(--danger);
-            color: #fca5a5;
-            padding: 8px;
-            border-radius: 6px;
-            margin: 10px 0;
-            font-weight: 700;
-            text-align: center;
-        }
-        .mockup-option {
-            border: 1px dashed rgba(255, 255, 255, 0.15);
-            padding: 6px;
-            border-radius: 6px;
-            margin: 5px 0;
-        }
-        .mockup-option.selected {
-            border-color: var(--success);
-            background: rgba(16, 185, 129, 0.05);
-            color: #a7f3d0;
-        }
-
-        /* Storyboard grid */
-        .storyboard-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
-        }
-        .storyboard-card {
-            background: rgba(255,255,255,0.02);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem;
-            transition: var(--transition);
-        }
-        .storyboard-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(255, 130, 0, 0.25);
-        }
-        .storyboard-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-        }
-        .storyboard-num {
-            background: var(--migros-orange);
-            color: #fff;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.72rem;
-            font-weight: 700;
-        }
-        .storyboard-card h4 {
-            font-size: 0.85rem;
-            color: #fff;
-            font-weight: 700;
-        }
-        .storyboard-card p {
-            font-size: 0.72rem;
-            color: var(--text-secondary);
-            line-height: 1.4;
-        }
-
-        /* Role Colors for dots & indicators */
-        .role-1-color { color: #f43f5e; }
-        .role-2-color { color: #38bdf8; }
-        .role-3-color { color: #a7f3d0; }
-        .role-4-color { color: #fb7185; }
-
         /* Responsive adjustments */
         @media (max-width: 1024px) {
             .slide-content-grid {
@@ -686,244 +616,62 @@
     <header>
         <div class="header-logo">
             <img src="https://upload.wikimedia.org/wikipedia/tr/0/06/Migros_Logo.png" alt="Migros Logo">
-            <span class="header-title">M-SKT BÜTÜNLEŞİK SÜREÇ SUNUMU</span>
+            <span class="header-title">M-SKT GEREKSİNİM ANALİZİ & MODELLERİ</span>
         </div>
-        <div class="roles-container">
-            <span class="role-indicator-badge active" id="role-indicator-0">Kapak</span>
-            <span class="role-indicator-badge" id="role-indicator-1">Üye 1: Süreç Analisti</span>
-            <span class="role-indicator-badge" id="role-indicator-2">Üye 2: Süreç Mimarı</span>
-            <span class="role-indicator-badge" id="role-indicator-3">Üye 3: Gereksinim Müh.</span>
-            <span class="role-indicator-badge" id="role-indicator-4">Üye 4: Ürün Tasarımcısı</span>
-        </div>
+        <div class="role-badge">👤 Üye 3: Gereksinim Mühendisi</div>
     </header>
 
     <!-- SLIDE CONTAINER -->
     <div class="slide-container">
 
         <!-- SLIDE 1: KAPAK -->
-        <div class="slide active" id="slide-1" data-role="0">
+        <div class="slide active" id="slide-1">
             <div class="cover-layout">
-                <span class="badge-step">BÜTÜNLEŞİK PROJE SUNUMU</span>
-                <h1>Migros Sistem Destekli Dinamik<br>SKT Yönetim Modeli (M-SKT)</h1>
-                <p class="subtitle">Bu sunum, 4 kişilik proje ekibinin (Süreç Analisti, Süreç Mimarı, Gereksinim Mühendisi ve Ürün Tasarımcısı) hazırladığı final çalışmalarını bütünleşik bir slayt yapısında bir araya getirmektedir.</p>
-                <button class="pulse-btn" onclick="nextSlide()">Sunumu Başlat <i class="bi bi-arrow-right"></i></button>
+                <span class="badge-step">GEREKSİNİM MÜHENDİSLİĞİ TESLİMATI</span>
+                <h1>M-SKT Yazılımsal & Teknik<br>Gereksinim Modellemesi</h1>
+                <p class="subtitle">Bu sunum, M-SKT projesinin Agile Ürün Yönetimi, MoSCoW ve KANO Gereksinim Kataloğu, User Story ve INVEST analizi, Gherkin Senaryoları ve UML Use Case modellerini içermektedir.</p>
+                <button class="pulse-btn" onclick="nextSlide()">Sunumu İncele <i class="bi bi-arrow-right"></i></button>
             </div>
         </div>
 
-        <!-- SLIDE 2: ÜYE 1 - AS-IS & KÖK NEDEN -->
-        <div class="slide" id="slide-2" data-role="1">
+        <!-- SLIDE 2: ROL & GÖREV ÖZETİ -->
+        <div class="slide" id="slide-2">
             <div class="slide-content-grid">
                 <div>
-                    <span class="badge-step">Üye 1 / Süreç Analisti</span>
-                    <h2 class="slide-sub-title">AS-IS Akışı ve Kök Neden Analizi</h2>
-                    <p class="description">Mevcut manuel SKT kontrol süreçlerindeki zayıflıkların tespiti ve sistemsel kök neden sorgulaması.</p>
+                    <span class="badge-step">Giriş / Üye 3 Rolü</span>
+                    <h2 class="slide-sub-title">Yazılımsal ve Teknik Çevik Katman</h2>
+                    <p class="description">Gereksinim mühendisinin süreç tasarımlarını teknik bir yazılım yol haritasına dönüştürme sorumlulukları.</p>
                 </div>
                 <div class="glass-card">
                     <div class="info-grid">
                         <div class="info-box">
-                            <h3><i class="bi bi-x-octagon"></i> AS-IS Mevcut Akış</h3>
-                            <p>Reyonda gözle yapılan kontrol yetersiz kalır. Kasadaki EAN-13 barkodu SKT bilgisi barındırmadığından, hatalı ürün müşteriye satılır.</p>
+                            <h3><i class="bi bi-clipboard-check-fill"></i> Gereksinim Kataloğu</h3>
+                            <p>Sistemin fonksiyonel ve teknik yeteneklerini MoSCoW ve KANO modelleri üzerinden tasnif ederek yazılım kapsamını sınırlandırır.</p>
                         </div>
                         <div class="info-box">
-                            <h3><i class="bi bi-question-circle"></i> 5 Neden Analizi</h3>
-                            <p>Kök Neden: Sistemde doğruluk yerine hız ve saatlik sepet kotasını (KPI) tekil olarak cezalandıran/ödüllendiren hatalı KPI tasarımı.</p>
+                            <h3><i class="bi bi-people-fill"></i> User Story & INVEST</h3>
+                            <p>Kullanıcı personanın ihtiyaçlarını bağımsız, test edilebilir ve değerli kullanıcı hikayeleri (User Stories) olarak formüle eder.</p>
                         </div>
                         <div class="info-box">
-                            <h3><i class="bi bi-bezier2"></i> Balık Kılçığı Sentezi</h3>
-                            <p>Problem; sistem altyapısı (SKT verisiz EAN-13), omnichannel operasyonel çakışmalar ve personel üzerindeki hız baskısının birleşimidir.</p>
+                            <h3><i class="bi bi-patch-check-fill"></i> Gherkin Kabul Kriterleri</h3>
+                            <p>Given-When-Then test senaryolarıyla sistem davranışlarını otomatik ve manuel test ekipleri için netleştirir.</p>
+                        </div>
+                        <div class="info-box">
+                            <h3><i class="bi bi-diagram-3-fill"></i> UML Use Case Modeli</h3>
+                            <p>Aktörler ile sistem sınırı arasındaki etkileşim yapısını teknik kullanım senaryoları diyagramıyla belgeler.</p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SLIDE 3: ÜYE 1 - LEAN VE EBO -->
-        <div class="slide" id="slide-3" data-role="1">
+        <!-- SLIDE 3: FONKSİYONEL GEREKSİNİMLER -->
+        <div class="slide" id="slide-3">
             <div class="slide-content-grid">
                 <div>
-                    <span class="badge-step">Üye 1 / Süreç Analisti</span>
-                    <h2 class="slide-sub-title">Lean (Yalın) Analiz & EBO Yaklaşımı</h2>
-                    <p class="description">Süreçteki 3M (Muda, Mura, Muri) israf parametrelerinin analizi ve iyileştirme kararlarının raporlanması.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="scrollable-content">
-                        <table class="premium-table">
-                            <thead>
-                                <tr>
-                                    <th>Kriter</th>
-                                    <th>3M & İsraf Karşılığı</th>
-                                    <th>EBO İyileştirme Kararı</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Muda (İsraf)</td>
-                                    <td>İade edilen bozuk gıdaların imha ve lojistik maliyetleri.</td>
-                                    <td><strong>Elimine Et:</strong> Manuel kontrol ihtiyacını kaldırarak israfı önleme.</td>
-                                </tr>
-                                <tr>
-                                    <td>Mura (Düzensizlik)</td>
-                                    <td>Akşam saatlerinde online sipariş yığılmasıyla bozulan reyon düzeni.</td>
-                                    <td><strong>Birleştir:</strong> Kasa okutma ve SKT doğrulama adımlarını entegre etme.</td>
-                                </tr>
-                                <tr>
-                                    <td>Muri (Aşırı Yükleme)</td>
-                                    <td>Saatlik sepet kotalarıyla personelin üzerindeki aşırı stres.</td>
-                                    <td><strong>Optimize Et:</strong> Yakın tarihli stokları %20 indirimle hızla eritme.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 4: ÜYE 2 - TO-BE SÜRECİ -->
-        <div class="slide" id="slide-4" data-role="2">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 2 / Süreç Mimarı</span>
-                    <h2 class="slide-sub-title">TO-BE BPMN Süreç Akış Haritası</h2>
-                    <p class="description">Sistem destekli yeni dinamik süreç mimarisinin şeritler (Lanes), karar kapıları (Gateways) ve aksiyonlarla modellenmesi.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="uml-box">
-                        <div style="display: flex; flex-direction: column; gap: 15px; width: 100%;">
-                            <div class="use-case-node" style="border-left: 4px solid var(--migros-orange);">[MÜŞTERİ] Ürünü Reyondan Alır veya Sanal Marketten Seçer</div>
-                            <div class="use-case-node" style="border-left: 4px solid var(--info);">[KASADA OKUTMA] Özel Barkod (SKT bilgili) Taranır</div>
-                            <div class="info-grid" style="grid-template-columns: 1fr 1fr; gap: 10px;">
-                                <div class="use-case-node" style="border-color: var(--danger); background: rgba(239,68,68,0.05);">
-                                    <span class="label-pill danger-label" style="margin-bottom: 5px;">SKT Geçmişse</span><br>Satış Engellenir & Bloke
-                                </div>
-                                <div class="use-case-node" style="border-color: var(--success); background: rgba(16,185,129,0.05);">
-                                    <span class="label-pill success-label" style="margin-bottom: 5px;">SKT Yakınsa (1-2 Gün)</span><br>Otomatik %20 İndirim + Fiş/SMS Uyarısı
-                                </div>
-                            </div>
-                            <div class="use-case-node" style="border-left: 4px solid var(--success);">[SATIŞ TAMAMLANDI] Money SMS ve Fiş Bilgilendirmesi Yapılır</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 5: ÜYE 2 - PAYDAŞ & RACI -->
-        <div class="slide" id="slide-5" data-role="2">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 2 / Süreç Mimarı</span>
-                    <h2 class="slide-sub-title">Paydaş Matrisi & RACI Sorumlulukları</h2>
-                    <p class="description">Organizasyonel rollerin netleştirilmesi ve iç/dış paydaşların stratejik yönetim planlaması.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="scrollable-content">
-                        <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: #fff;"><i class="bi bi-table"></i> RACI Sorumluluk Tablosu</h4>
-                        <table class="premium-table" style="margin-bottom: 1.5rem;">
-                            <thead>
-                                <tr>
-                                    <th>İş Paketi</th>
-                                    <th>Kasiyer</th>
-                                    <th>Reyon Görevlisi</th>
-                                    <th>Müdür</th>
-                                    <th>Sistem</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Barkod Güncelleme</td>
-                                    <td>I</td>
-                                    <td><strong>R</strong></td>
-                                    <td><strong>A</strong></td>
-                                    <td>C</td>
-                                </tr>
-                                <tr>
-                                    <td>Kasada Blokaj</td>
-                                    <td><strong>R</strong></td>
-                                    <td>-</td>
-                                    <td><strong>A</strong></td>
-                                    <td>C</td>
-                                </tr>
-                                <tr>
-                                    <td>Otomatik İndirim</td>
-                                    <td>-</td>
-                                    <td>-</td>
-                                    <td>I</td>
-                                    <td><strong>R</strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                        
-                        <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: #fff;"><i class="bi bi-grid-fill"></i> Güç/İlgi Matrisi Özeti</h4>
-                        <div class="info-grid" style="grid-template-columns: 1fr 1fr; gap: 8px;">
-                            <div class="info-box" style="padding: 10px;">
-                                <h3 style="font-size: 0.8rem;"><i class="bi bi-exclamation-triangle"></i> Yakın Yönet</h3>
-                                <p style="font-size: 0.72rem;">Mağaza Müdürleri, Kalite Yönetimi.</p>
-                            </div>
-                            <div class="info-box" style="padding: 10px;">
-                                <h3 style="font-size: 0.8rem;"><i class="bi bi-info-circle"></i> Bilgilendir</h3>
-                                <p style="font-size: 0.72rem;">Kasiyer ve Reyon Çalışanları, Müşteri.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 6: ÜYE 2 - AS-IS / TO-BE KARŞILAŞTIRMA -->
-        <div class="slide" id="slide-6" data-role="2">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 2 / Süreç Mimarı</span>
-                    <h2 class="slide-sub-title">AS-IS / TO-BE Karşılaştırma Analizi</h2>
-                    <p class="description">Yapılan sistem ve akış iyileştirmelerinin Migros operasyonuna getirdiği analitik kazanımlar.</p>
-                </div>
-                <div class="glass-card">
-                    <table class="premium-table">
-                        <thead>
-                            <tr>
-                                <th>Karşılaştırma Kriteri</th>
-                                <th>AS-IS (Eski)</th>
-                                <th>TO-BE (Yeni)</th>
-                                <th>Operasyonel Etki</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Kontrol Noktası</td>
-                                <td>Reyonda manuel göz taraması</td>
-                                <td>Kasada dijital sistem blokajı</td>
-                                <td>Kritik hata payı sıfıra indirildi.</td>
-                            </tr>
-                            <tr>
-                                <td>İmha & Zayiat</td>
-                                <td>Günü geçen ürün imha edilir</td>
-                                <td>Yakın tarihli ürün %20 indirim</td>
-                                <td>İmha maliyetlerinde %40 düşüş.</td>
-                            </tr>
-                            <tr>
-                                <td>Müşteri Krizleri</td>
-                                <td>Satış sonrası şikayet / iade</td>
-                                <td>Kasada anında engelleme</td>
-                                <td>Marka ve itibar erozyonu önlendi.</td>
-                            </tr>
-                            <tr>
-                                <td>İş Gücü Yükü</td>
-                                <td>Günde 2 saat reyon kontrolü</td>
-                                <td>Nokta atışı sistem uyarıları</td>
-                                <td>Personel verimliliği artırıldı.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 7: ÜYE 3 - GEREKSİNİM KATALOĞU -->
-        <div class="slide" id="slide-7" data-role="3">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 3 / Gereksinim Mühendisi</span>
-                    <h2 class="slide-sub-title">Fonksiyonel Gereksinim Kataloğu</h2>
-                    <p class="description">Sistemdeki temel yazılım bileşenlerinin ne yapması gerektiğini tanımlayan MoSCoW öncelikli gereksinimler.</p>
+                    <span class="badge-step">Aşama 1 / Gereksinim Kataloğu</span>
+                    <h2 class="slide-sub-title">Fonksiyonel Gereksinimler (FR)</h2>
+                    <p class="description">M-SKT sisteminin sahip olması gereken işlevsel özellikler ve öncelik dereceleri.</p>
                 </div>
                 <div class="glass-card">
                     <div class="scrollable-content">
@@ -932,7 +680,8 @@
                                 <tr>
                                     <th>ID</th>
                                     <th>Gereksinim Açıklaması</th>
-                                    <th>Öncelik</th>
+                                    <th>MoSCoW</th>
+                                    <th>KANO</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -940,31 +689,37 @@
                                     <td>FR-01</td>
                                     <td>Barkoddan SKT, gramaj ve ürün kimliği çözümlenmeli.</td>
                                     <td><span class="label-pill must">MUST</span></td>
+                                    <td>Temel (Must-be)</td>
                                 </tr>
                                 <tr>
                                     <td>FR-02</td>
                                     <td>Kasada SKT geçmiş ürüne otomatik bloke konulmalı.</td>
                                     <td><span class="label-pill must">MUST</span></td>
+                                    <td>Temel (Must-be)</td>
                                 </tr>
                                 <tr>
                                     <td>FR-03</td>
                                     <td>Kritik tarihli (1-2 gün) ürüne otomatik %20 indirim uygulanmalı.</td>
                                     <td><span class="label-pill must">MUST</span></td>
+                                    <td>Performans (Linear)</td>
                                 </tr>
                                 <tr>
                                     <td>FR-04</td>
                                     <td>Kasa fişi altına "SKT'ye X gün kalmıştır" yazılmalı.</td>
                                     <td><span class="label-pill should">SHOULD</span></td>
+                                    <td>Çekici (Delighter)</td>
                                 </tr>
                                 <tr>
                                     <td>FR-05</td>
-                                    <td>Money kart girildiyse SMS uyarı bildirimi gönderilmeli.</td>
+                                    <td>Money kart sahiplerine SMS ile SKT hatırlatması gönderilmeli.</td>
                                     <td><span class="label-pill should">SHOULD</span></td>
+                                    <td>Çekici (Delighter)</td>
                                 </tr>
                                 <tr>
                                     <td>FR-06</td>
                                     <td>Sanal markette "SKT Garantisi" veya "İndirimli Fırsat" seçeneği sunulmalı.</td>
                                     <td><span class="label-pill must">MUST</span></td>
+                                    <td>Performans (Linear)</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -973,13 +728,13 @@
             </div>
         </div>
 
-        <!-- SLIDE 8: ÜYE 3 - GEREKSİNİM NFR -->
-        <div class="slide" id="slide-8" data-role="3">
+        <!-- SLIDE 4: FONKSİYONEL OLMAYAN GEREKSİNİMLER -->
+        <div class="slide" id="slide-4">
             <div class="slide-content-grid">
                 <div>
-                    <span class="badge-step">Üye 3 / Gereksinim Mühendisi</span>
+                    <span class="badge-step">Aşama 1 / Gereksinim Kataloğu</span>
                     <h2 class="slide-sub-title">Fonksiyonel Olmayan Gereksinimler (NFR)</h2>
-                    <p class="description">Sistemin kalitesini, hız limitlerini ve güvenliğini belirleyen teknik parametreler.</p>
+                    <p class="description">Sistemin performansı, güvenliği, ölçeklenebilirliği ve iş sürekliliği standartları.</p>
                 </div>
                 <div class="glass-card">
                     <table class="premium-table">
@@ -987,33 +742,33 @@
                             <tr>
                                 <th>ID</th>
                                 <th>Kategori</th>
-                                <th>Açıklama</th>
-                                <th>Öncelik</th>
+                                <th>Teknik Gereksinim Açıklaması</th>
+                                <th>MoSCoW</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <td>NFR-01</td>
-                                <td>Hız / Performans</td>
-                                <td>Kasa SKT sorgu süresi en fazla 150 ms olmalıdır.</td>
+                                <td>Performans / Hız</td>
+                                <td>Kasada barkod sorgu ve yanıt süresi en fazla 150 ms olmalıdır.</td>
                                 <td><span class="label-pill must">MUST</span></td>
                             </tr>
                             <tr>
                                 <td>NFR-02</td>
                                 <td>Güvenilirlik</td>
-                                <td>Sistem offline modda lokal veritabanından doğrulama yapabilmelidir.</td>
+                                <td>Sistem offline modda lokal veri tabanından çalışabilmelidir.</td>
                                 <td><span class="label-pill must">MUST</span></td>
                             </tr>
                             <tr>
                                 <td>NFR-03</td>
                                 <td>Güvenlik</td>
-                                <td>Bloke kaldırma ve indirim oranları müdür şifresine tabi olmalıdır.</td>
+                                <td>Parametre güncellemeleri ve bloke kaldırmalar müdür onayına tabi olmalıdır.</td>
                                 <td><span class="label-pill must">MUST</span></td>
                             </tr>
                             <tr>
                                 <td>NFR-04</td>
                                 <td>Ölçeklenebilirlik</td>
-                                <td>3.720+ mağazayı ve sanal marketi aynı anda kaldırabilmelidir.</td>
+                                <td>Sistem saniyede maksimum 5.000 eş zamanlı sorguyu (TPS) kaldırabilmelidir.</td>
                                 <td><span class="label-pill should">SHOULD</span></td>
                             </tr>
                         </tbody>
@@ -1022,61 +777,167 @@
             </div>
         </div>
 
-        <!-- SLIDE 9: ÜYE 3 - USER STORIES & INVEST -->
-        <div class="slide" id="slide-9" data-role="3">
+        <!-- SLIDE 5: USER STORIES -->
+        <div class="slide" id="slide-5">
             <div class="slide-content-grid">
                 <div>
-                    <span class="badge-step">Üye 3 / Gereksinim Mühendisi</span>
-                    <h2 class="slide-sub-title">Kullanıcı Hikayeleri & INVEST Kalitesi</h2>
-                    <p class="description">Agile ürün geliştirme standartlarına göre hedeflenen kullanıcı deneyimi senaryoları.</p>
+                    <span class="badge-step">Aşama 2 / User Stories</span>
+                    <h2 class="slide-sub-title">Kullanıcı Hikayeleri (User Stories)</h2>
+                    <p class="description">Yazılım ekibinin odaklanacağı, kullanıcı ve çalışan odaklı senaryolar.</p>
                 </div>
                 <div class="glass-card">
                     <div class="scrollable-content">
                         <div class="user-story-card">
-                            <div class="user-story-title"><i class="bi bi-person-badge-fill"></i> US-01: Kasa Blokajı (Kasiyer)</div>
-                            <div class="user-story-body"><strong>Bir</strong> Kasiyer olarak, kasada tarihi geçmiş bir ürünü okuttuğumda sistemin satışı engellemesini istiyorum. <strong>Böylece</strong> müşteriye yanlışlıkla bozuk ürün satmam.</div>
+                            <div class="user-story-title"><i class="bi bi-person-badge-fill"></i> US-01: Kasa Blokajı (Kasiyer Personası)</div>
+                            <div class="user-story-body"><strong>Bir</strong> Kasiyer olarak, kasada tarihi geçmiş bir et/tavuk ürününü okuttuğumda sistemin satışı bloke etmesini ve uyarı vermesini istiyorum. <strong>Böylece</strong> müşteriye yanlışlıkla bozuk ürün satmamış olurum.</div>
                         </div>
                         <div class="user-story-card">
-                            <div class="user-story-title"><i class="bi bi-cart-fill"></i> US-02: Dinamik Tercih (Sanal Market Müşterisi)</div>
-                            <div class="user-story-body"><strong>Bir</strong> Sanal Market Müşterisi olarak, sepete ürün eklerken indirimli yakın tarihli ürün seçebilmek istiyorum. <strong>Böylece</strong> bütçemi korur, gıda israfını önlerim.</div>
+                            <div class="user-story-title"><i class="bi bi-cart-fill"></i> US-02: Dinamik İndirimli Sipariş (Sanal Market Müşterisi)</div>
+                            <div class="user-story-body"><strong>Bir</strong> Sanal Market Müşterisi olarak, online alışveriş sepetimde et/süt ürünlerinde indirimli yakın tarihli ürün seçebilmek istiyorum. <strong>Böylece</strong> bütçeme tasarruf sağlar ve gıda israfını önlerim.</div>
+                        </div>
+                        <div class="user-story-card">
+                            <div class="user-story-title"><i class="bi bi-chat-left-text-fill"></i> US-03: Otomatik SMS Bildirimi (Fiziksel Müşteri)</div>
+                            <div class="user-story-body"><strong>Bir</strong> Money Üyesi olarak, fiziksel reyonlardan aldığım yakın tarihli et ürününün SKT'sine 2 gün kala SMS ile uyarılmak istiyorum. <strong>Böylece</strong> aldığım ürünü bozmadan zamanında tüketebilirim.</div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SLIDE 10: ÜYE 3 - GHERKIN TEST SENARYOLARI -->
-        <div class="slide" id="slide-10" data-role="3">
+        <!-- SLIDE 6: INVEST MATRİSİ -->
+        <div class="slide" id="slide-6">
             <div class="slide-content-grid">
                 <div>
-                    <span class="badge-step">Üye 3 / Gereksinim Mühendisi</span>
-                    <h2 class="slide-sub-title">Gherkin Kabul Kriterleri</h2>
-                    <p class="description">Given-When-Then formatında oluşturulmuş, yazılım ve test ekiplerinin doğrudan kullanabileceği doğrulama senaryoları.</p>
+                    <span class="badge-step">Aşama 2 / User Stories</span>
+                    <h2 class="slide-sub-title">INVEST Kalite Değerlendirmesi</h2>
+                    <p class="description">Yazılan kullanıcı hikayelerinin çevik standartlara uygunluğunu denetleyen INVEST analizi matrisi.</p>
+                </div>
+                <div class="glass-card">
+                    <table class="premium-table">
+                        <thead>
+                            <tr>
+                                <th>Kullanıcı Hikayesi</th>
+                                <th>I (Bağımsız)</th>
+                                <th>N (Müzakere)</th>
+                                <th>V (Değerli)</th>
+                                <th>E (Tahmin)</th>
+                                <th>S (Küçük)</th>
+                                <th>T (Test Edilebilir)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>US-01 (Kasa Blokajı)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                                <td>Yüksek</td>
+                                <td>Evet (3 Gün)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                            </tr>
+                            <tr>
+                                <td>US-02 (Sanal Market)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                                <td>Yüksek</td>
+                                <td>Evet (5 Gün)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                            </tr>
+                            <tr>
+                                <td>US-03 (SMS Bildirim)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                                <td>Orta</td>
+                                <td>Evet (2 Gün)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                            </tr>
+                            <tr>
+                                <td>US-04 (Manuel İptal)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                                <td>Orta</td>
+                                <td>Evet (2 Gün)</td>
+                                <td>Evet</td>
+                                <td>Evet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7: GHERKIN SENARYO 1 -->
+        <div class="slide" id="slide-7">
+            <div class="slide-content-grid">
+                <div>
+                    <span class="badge-step">Aşama 3 / Gherkin Kabul Kriterleri</span>
+                    <h2 class="slide-sub-title">Kabul Kriteri: Kasa Blokajı</h2>
+                    <p class="description">SKT'si geçmiş ürünlerin satış anında sistem tarafından engellenmesini test eden kabul kriterleri.</p>
                 </div>
                 <div class="gherkin-container">
                     <div class="gherkin-card">
-                        <div class="gherkin-line"><span class="gh-keyword">Senaryo:</span> <span class="gh-step">Kasada SKT geçmiş et ürününün satışının engellenmesi</span></div>
-                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Giriş (Given):</span> Sistem tarihi <span class="gh-arg">"12.06.2026"</span>, ürün SKT <span class="gh-arg">"10.06.2026"</span> olarak taranmıştır.</div>
-                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Eyleme Geçildiğinde (When):</span> Kasiyer ürünü barkod okuyucuya okuttuğunda</div>
-                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Sonuç Olarak (Then):</span> Sistem kasada kırmızı renkli <span class="gh-string">"Satış Engellendi: Ürün SKT'si Geçmiştir!"</span> uyarısı vermelidir.</div>
-                    </div>
-                    <div class="gherkin-card">
-                        <div class="gherkin-line"><span class="gh-keyword">Senaryo:</span> <span class="gh-step">Kritik yakın tarihli ürüne indirim uygulanması</span></div>
-                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Giriş (Given):</span> Sistem tarihi <span class="gh-arg">"08.06.2026"</span>, ürün SKT <span class="gh-arg">"10.06.2026"</span> olarak girilmiştir.</div>
-                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Eyleme Geçildiğinde (When):</span> Ürün okutulduğunda</div>
-                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Sonuç Olarak (Then):</span> Sistem ürüne otomatik <span class="gh-arg">%20 indirim</span> uygulamalı ve fişe eklemelidir.</div>
+                        <div class="gherkin-line"><span class="gh-keyword">Senaryo:</span> <span class="gh-step">Son kullanma tarihi geçmiş et ürününün satışının engellenmesi</span></div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Given (Giriş):</span> Sistem tarihi <span class="gh-arg">"12.06.2026"</span> olarak ayarlanmıştır.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">And (Ve):</span> Taranan tavuk ürününün barkodundaki SKT <span class="gh-arg">"10.06.2026"</span> olarak girilmiştir.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">When (Eyleme Geçildiğinde):</span> Kasiyer ürünü barkod okuyucuya okuttuğunda</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Then (Sonuç Olarak):</span> Sistem kasada sesli hata vermeli ve kırmızı <span class="gh-string">"Satış Engellendi: Ürün SKT'si Geçmiştir!"</span> uyarısı göstermelidir.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">And (Ve):</span> Ürün fiyatı genel toplam tutarına eklenmemelidir.</div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SLIDE 11: ÜYE 3 - UML USE CASE -->
-        <div class="slide" id="slide-11" data-role="3">
+        <!-- SLIDE 8: GHERKIN SENARYO 2 -->
+        <div class="slide" id="slide-8">
             <div class="slide-content-grid">
                 <div>
-                    <span class="badge-step">Üye 3 / Gereksinim Mühendisi</span>
-                    <h2 class="slide-sub-title">UML Use Case Diyagramı</h2>
-                    <p class="description">Aktörlerin (Kasiyer ve Müşteri) sistem sınırı içerisindeki kullanım durumları (Use Cases) ile etkileşimi.</p>
+                    <span class="badge-step">Aşama 3 / Gherkin Kabul Kriterleri</span>
+                    <h2 class="slide-sub-title">Kabul Kriteri: Dinamik İndirim</h2>
+                    <p class="description">Son kullanma tarihine az kalan yakın tarihli ürünlerde dinamik olarak indirim uygulanması senaryosu.</p>
+                </div>
+                <div class="gherkin-container">
+                    <div class="gherkin-card">
+                        <div class="gherkin-line"><span class="gh-keyword">Senaryo:</span> <span class="gh-step">Son kullanma tarihine 2 gün kalmış ürüne %20 indirim uygulanması</span></div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Given (Giriş):</span> Sistem tarihi <span class="gh-arg">"08.06.2026"</span> olarak ayarlanmıştır.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">And (Ve):</span> Taranan et ürününün barkodundaki SKT <span class="gh-arg">"10.06.2026"</span> olarak kodlanmıştır.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">When (Eyleme Geçildiğinde):</span> Kasiyer ürünü okuttuğunda</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Then (Sonuç Olarak):</span> Sistem ürünü "Kritik Yakın Tarihli Ürün" olarak algılamalıdır.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">And (Ve):</span> Ürün fiyatına otomatik olarak %20 indirim yansıtılmalıdır.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">And (Ve):</span> Fiş detayında <span class="gh-string">"Yakın Tarih İndirimi"</span> kalemi yazdırılmalıdır.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 9: GHERKIN SENARYO 3 -->
+        <div class="slide" id="slide-9">
+            <div class="slide-content-grid">
+                <div>
+                    <span class="badge-step">Aşama 3 / Gherkin Kabul Kriterleri</span>
+                    <h2 class="slide-sub-title">Kabul Kriteri: Sanal Market Tercihi</h2>
+                    <p class="description">Müşterinin online market üzerinden bilinçli olarak yakın tarihli indirimli ürün veya uzun tarihli garanti ürün seçmesi durumunun doğrulanması.</p>
+                </div>
+                <div class="gherkin-container">
+                    <div class="gherkin-card">
+                        <div class="gherkin-line"><span class="gh-keyword">Senaryo:</span> <span class="gh-step">Sanal markette indirimli yakın tarihli ürün seçimi</span></div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Given (Giriş):</span> Müşteri sepetine 100 TL değerinde Migros Süt eklemiştir.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">When (Eyleme Geçildiğinde):</span> Sepette <span class="gh-string">"1-2 Gün SKT Fırsatı (%20 İndirimli)"</span> seçildiğinde</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">Then (Sonuç Olarak):</span> Sistem ürün fiyatını 100 TL'den 80 TL'ye düşürmelidir.</div>
+                        <div class="gherkin-line">&nbsp;&nbsp;<span class="gh-keyword">And (Ve):</span> Toplayıcı (picker) terminal ekranına reyon ön sırasından ürün seçme görevi atanmalıdır.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SLIDE 10: UML USE CASE -->
+        <div class="slide" id="slide-10">
+            <div class="slide-content-grid">
+                <div>
+                    <span class="badge-step">Aşama 4 / Modelleme</span>
+                    <h2 class="slide-sub-title">UML Kullanım Durumu Modellemesi</h2>
+                    <p class="description">Aktörler ile sistem sınırı arasındaki etkileşim yapısını gösteren Kullanım Durumu diyagramı.</p>
                 </div>
                 <div class="uml-box">
                     <div class="use-case-container">
@@ -1085,185 +946,25 @@
                                 <i class="bi bi-person-fill-gear"></i>
                                 <span>Kasiyer</span>
                             </div>
+                            <div class="actor-node" style="margin-top: 10px;">
+                                <i class="bi bi-person-fill-lock"></i>
+                                <span>Mağaza Müdürü</span>
+                            </div>
                         </div>
                         <div class="system-boundary">
                             <div class="use-case-node">UC1: Barkod Okutma</div>
                             <div class="use-case-node">UC2: SKT Doğrulaması Yapma (Otomatik)</div>
                             <div class="use-case-node">UC3: Satış Engelleme / Bloke Koyma</div>
                             <div class="use-case-node">UC4: Otomatik İndirim Hesaplama</div>
-                            <div class="use-case-node">UC5: Sanal Market SKT Seçimi Yapma</div>
+                            <div class="use-case-node">UC5: Sanal Market SKT Seçimi</div>
+                            <div class="use-case-node">UC6: Fiş / SMS Uyarısı Tetikleme</div>
+                            <div class="use-case-node">UC7: Manuel Bloke Kaldırma (Müdür)</div>
                         </div>
                         <div class="actor-column">
                             <div class="actor-node">
                                 <i class="bi bi-people-fill"></i>
                                 <span>Müşteri</span>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 12: ÜYE 4 - PERSONA & EMPATİ -->
-        <div class="slide" id="slide-12" data-role="4">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 4 / Ürün Tasarımcısı</span>
-                    <h2 class="slide-sub-title">Persona & Empati Haritası</h2>
-                    <p class="description">Hedef kullanıcı kitlesini temsil eden persona modeli ve empati analiz kurgusu.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="info-grid">
-                        <div class="info-box">
-                            <h3><i class="bi bi-person-circle"></i> Persona: Ayşe Hanım</h3>
-                            <p>34 yaşında, çalışan anne. Taze ve sağlıklı et/tavuk almak istiyor. Vakti kısıtlı olduğundan rafta tarih kontrolü yapmakta zorlanıyor.</p>
-                        </div>
-                        <div class="info-box">
-                            <h3><i class="bi bi-heart-pulse"></i> Düşünce ve Hissiyat</h3>
-                            <p>"Eve gittiğimde bozuk veya bayat ürünle karşılaşmak istemiyorum. Migros'un bu kaliteyi benim adıma otomatik izlemesini bekliyorum."</p>
-                        </div>
-                        <div class="info-box">
-                            <h3><i class="bi bi-emoji-frown"></i> Acı Noktaları (Pains)</h3>
-                            <p>Bozuk ürün aldığında mağazaya geri gitmek zorunda kalması, para ve zaman kaybı, ailesinin sağlığına dair duyduğu endişe.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 13: ÜYE 4 - USER STORY MAPPING -->
-        <div class="slide" id="slide-13" data-role="4">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 4 / Ürün Tasarımcısı</span>
-                    <h2 class="slide-sub-title">User Story Mapping & MVP</h2>
-                    <p class="description">Ürün fonksiyonlarının omurga yapısına dizilmesi ve ilk canlı sürüm (MVP) sınırlarının belirlenmesi.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="scrollable-content">
-                        <table class="premium-table">
-                            <thead>
-                                <tr>
-                                    <th>Ürün Omurgası</th>
-                                    <th>MVP Sürümü (Hemen Canlıda)</th>
-                                    <th>Gelecek Sürümler (Faz 2)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>1. Ürün Seçimi</td>
-                                    <td>Et ve tavuk reyonlarında özel barkod basımı.</td>
-                                    <td>Süt, peynir, yumurta reyonlarına yaygınlaştırma.</td>
-                                </tr>
-                                <tr>
-                                    <td>2. Satın Alma</td>
-                                    <td>Kasada SKT geçmiş ürünü kilitleme / bloke.</td>
-                                    <td>Self-servis kasalara ve mobil ödemeye entegrasyon.</td>
-                                </tr>
-                                <tr>
-                                    <td>3. Kampanyalar</td>
-                                    <td>Kritik tarihli ürünlere kasada %20 indirim.</td>
-                                    <td>Kişiselleştirilmiş Money tarih indirim kuponları.</td>
-                                </tr>
-                                <tr>
-                                    <td>4. Müşteri Uyarısı</td>
-                                    <td>Kasa fişinin altında SKT uyarısı yazdırma.</td>
-                                    <td>Money Mobil Uygulama push bildirimi ve SMS.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 14: ÜYE 4 - WIREFRAME TASARIMLARI -->
-        <div class="slide" id="slide-14" data-role="4">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 4 / Ürün Tasarımcısı</span>
-                    <h2 class="slide-sub-title">Arayüz Tasarımları (Wireframes)</h2>
-                    <p class="description">Kasiyer ekranı (POS) ve Sanal Market sepet adımı için tasarlanan kullanıcı arayüzleri.</p>
-                </div>
-                <div class="mockup-container">
-                    <div class="mockup-screen">
-                        <div class="mockup-title">MİGROS KASA POS v10.4</div>
-                        <div>1. Banvit Tavuk Göğsü 630g ..... 75.00 TL</div>
-                        <div>2. Yarım Yağlı Süt 1L .......... 32.00 TL</div>
-                        <div class="mockup-alert">
-                            SATIŞ ENGELLENDİ: ÜRÜN SKT'Sİ GEÇMİŞTİR!<br>
-                            Tarih: 12.06 - Ürün SKT: 10.06
-                        </div>
-                        <div>Lütfen ürünü sepete ayırıp imhaya gönderin.</div>
-                    </div>
-                    <div class="mockup-screen">
-                        <div class="mockup-title">SANAL MARKET - SEPETİM</div>
-                        <div>[Ürün] Banvit Tavuk Göğsü 630g</div>
-                        <div class="mockup-option">
-                            ( ) Standart Garanti (En az 5 Gün SKT) .. 90 TL
-                        </div>
-                        <div class="mockup-option selected">
-                            (o) 1-2 Gün SKT Fırsatı (%20 İndirim) ... 72 TL
-                        </div>
-                        <div style="margin-top: 10px; font-weight: 700; color: #fff;">
-                            Ödenecek Toplam: 72.00 TL
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SLIDE 15: ÜYE 4 - STORYBOARD -->
-        <div class="slide" id="slide-15" data-role="4">
-            <div class="slide-content-grid">
-                <div>
-                    <span class="badge-step">Üye 4 / Ürün Tasarımcısı</span>
-                    <h2 class="slide-sub-title">Storyboard: Deneyim Yolculuğu</h2>
-                    <p class="description">Kullanıcının sistemle olan temasını problem anından çözüm ve memnuniyet aşamasına kadar anlatan deneyim akışı.</p>
-                </div>
-                <div class="glass-card">
-                    <div class="storyboard-grid">
-                        <div class="storyboard-card">
-                            <div class="storyboard-header">
-                                <h4>1. Reyon Keşfi</h4>
-                                <span class="storyboard-num">1</span>
-                            </div>
-                            <p>Ayşe Hanım akşam yemeği için Migros et reyonundan hızlıca paketli tavuk alır, tarihe bakmaz.</p>
-                        </div>
-                        <div class="storyboard-card">
-                            <div class="storyboard-header">
-                                <h4>2. Kasada Blokaj</h4>
-                                <span class="storyboard-num">2</span>
-                            </div>
-                            <p>Kasiyer ürünü okutur, kasa ekranı kırmızı yanarak satışı kilitler: "Ürün SKT'si Geçmiştir!"</p>
-                        </div>
-                        <div class="storyboard-card">
-                            <div class="storyboard-header">
-                                <h4>3. Taze Değişim</h4>
-                                <span class="storyboard-num">3</span>
-                            </div>
-                            <p>Kasiyer eski ürünü imhaya ayırır, reyon görevlisi hızlıca yeni ve taze paketi getirir.</p>
-                        </div>
-                        <div class="storyboard-card">
-                            <div class="storyboard-header">
-                                <h4>4. Yakın Tarih Fırsatı</h4>
-                                <span class="storyboard-num">4</span>
-                            </div>
-                            <p>Ayşe Hanım 2 gün kalmış peyniri sepete ekler, kasada %20 indirim otomatik yansır.</p>
-                        </div>
-                        <div class="storyboard-card">
-                            <div class="storyboard-header">
-                                <h4>5. Money SMS</h4>
-                                <span class="storyboard-num">5</span>
-                            </div>
-                            <p>Eve giderken telefonuna "Satın aldığınız peynirin SKT'sine 2 gün kaldı, tüketmeyi unutmayın" SMS'i gelir.</p>
-                        </div>
-                        <div class="storyboard-card">
-                            <div class="storyboard-header">
-                                <h4>6. Huzurlu Tüketim</h4>
-                                <span class="storyboard-num">6</span>
-                            </div>
-                            <p>Ayşe Hanım güvenle ve tasarruf etmiş olmanın huzuruyla akşam yemeğini ailesine hazırlar.</p>
                         </div>
                     </div>
                 </div>
@@ -1286,7 +987,7 @@
     <!-- JAVASCRIPT -->
     <script>
         let currentSlideIdx = 1;
-        const totalSlides = 15;
+        const totalSlides = 10;
 
         // Noktaları oluştur
         const dotsContainer = document.getElementById('dotsContainer');
@@ -1316,11 +1017,6 @@
                 const nextActive = document.getElementById(`slide-${idx}`);
                 if (nextActive) {
                     nextActive.classList.add('active');
-                    
-                    // Header'daki aktif rol bilgisini güncelle
-                    const role = nextActive.getAttribute('data-role');
-                    updateRoleIndicator(role);
-
                     setTimeout(() => {
                         nextActive.style.opacity = '1';
                         nextActive.style.transform = 'translateX(0)';
@@ -1339,17 +1035,6 @@
             });
 
             currentSlideIdx = idx;
-        }
-
-        function updateRoleIndicator(role) {
-            const badges = document.querySelectorAll('.role-indicator-badge');
-            badges.forEach((badge, idx) => {
-                if (idx == role) {
-                    badge.classList.add('active');
-                } else {
-                    badge.classList.remove('active');
-                }
-            });
         }
 
         function nextSlide() {
