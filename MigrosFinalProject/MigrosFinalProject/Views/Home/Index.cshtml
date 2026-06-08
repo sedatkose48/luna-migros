@@ -1404,33 +1404,506 @@
         <!-- KANO MODELİ BAŞLIĞI -->
         <div style="width:100%; margin-bottom:1.5rem;">
             <div style="font-family:'Montserrat'; font-size:1.1rem; font-weight:800; color:#f8b500; display:flex; align-items:center; gap:8px;">
-                <i class="bi bi-diagram-3-fill"></i> KANO MODELİ ANALİZİ — Yukarıdaki Gereksinimler Grafik Üzerinde Sınıflandırılmıştır
+                <i class="bi bi-diagram-3-fill"></i> KANO MODELİ ANALİZİ — Gereksinimler Etkileşimli Matris Üzerinde Sınıflandırılmıştır
             </div>
-            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Aşağıdaki 3D grafikte her bir gereksinim, Kano kategorisine göre ilgili eğri üzerine yerleştirilmiştir. Düğümlere tıklayarak detayları inceleyebilirsiniz.</p>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Aşağıdaki interaktif Kano Matrisinde özellik etiketlerine tıklayarak detayları inceleyebilirsiniz.</p>
         </div>
-        <div class="kano-wrapper">
-            <div class="kano-canvas-container" id="canvas-3d-kano">
-                <div class="kano-title"><i class="bi bi-graph-up-arrow"></i> 3D KANO MODELİ SİMÜLATÖRÜ (Etkileşimli)</div>
-                <div class="kano-axis-label" style="top: 15px; left: 50%; transform: translateX(-50%); color: var(--green-accent);"><i class="bi bi-chevron-up"></i> YÜKSEK MEMNUNİYET</div>
-                <div class="kano-axis-label" style="bottom: 15px; left: 50%; transform: translateX(-50%); color: #ff4b4b;">DÜŞÜK MEMNUNİYET <i class="bi bi-chevron-down"></i></div>
-                <div class="kano-axis-label" style="top: 50%; right: 15px; transform: translateY(-50%); color: var(--cyan-accent);">TAM İŞLEV <i class="bi bi-chevron-right"></i></div>
-                <div class="kano-axis-label" style="top: 50%; left: 15px; transform: translateY(-50%); color: var(--text-muted);"><i class="bi bi-chevron-left"></i> EKSİK İŞLEV</div>
-            </div>
-            <div class="kano-hud-panel" id="kano-hud">
-                <div class="hud-header"><i class="bi bi-list-task"></i> GEREKSİNİM DETAYLARI & KANO KATEGORİSİ</div>
-                <div class="kano-req-selector">
-                    <button class="kano-tab-btn must-be-btn active" id="btn-kano-FR-01" onclick="selectKanoReq('FR-01')">FR-01: Barkod</button>
-                    <button class="kano-tab-btn perf-btn" id="btn-kano-FR-04" onclick="selectKanoReq('FR-04')">FR-04: Sepet</button>
-                    <button class="kano-tab-btn delight-btn" id="btn-kano-FR-06" onclick="selectKanoReq('FR-06')">FR-06: Money App</button>
-                    <button class="kano-tab-btn must-be-btn" id="btn-kano-NFR-SPEED" onclick="selectKanoReq('NFR-SPEED')">NFR: Hız</button>
-                    <button class="kano-tab-btn perf-btn" id="btn-kano-NFR-ACC" onclick="selectKanoReq('NFR-ACC')">NFR: Kesinlik</button>
-                    <button class="kano-tab-btn must-be-btn" id="btn-kano-NFR-SEC" onclick="selectKanoReq('NFR-SEC')">NFR: Güvenlik</button>
+
+        <!-- YENİ KANO MATRİSİ -->
+        <style>
+            .kano-matrix-section {
+                width: 100%;
+                margin-bottom: 5rem;
+                display: grid;
+                grid-template-columns: 1fr 380px;
+                gap: 1.5rem;
+                align-items: start;
+            }
+            .kano-matrix-card {
+                background: linear-gradient(135deg, rgba(10,16,40,0.95) 0%, rgba(5,10,25,0.98) 100%);
+                border: 1px solid rgba(249,115,22,0.3);
+                border-radius: 20px;
+                padding: 2rem;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.6), inset 0 0 40px rgba(249,115,22,0.03);
+                position: relative;
+                overflow: hidden;
+            }
+            .kano-matrix-card::before {
+                content: '';
+                position: absolute;
+                top: 0; left: 0; right: 0;
+                height: 3px;
+                background: linear-gradient(90deg, transparent, #f97316, #fceabb, #f97316, transparent);
+                border-radius: 20px 20px 0 0;
+            }
+            .kano-matrix-title {
+                text-align: center;
+                font-family: 'Montserrat', sans-serif;
+                font-size: 1.6rem;
+                font-weight: 900;
+                letter-spacing: 2px;
+                margin-bottom: 1.5rem;
+                text-transform: uppercase;
+            }
+            .kano-matrix-title .title-migros { color: #f97316; }
+            .kano-matrix-title .title-kano { color: #ffffff; font-style: italic; }
+            .kano-svg-wrapper {
+                position: relative;
+                width: 100%;
+                aspect-ratio: 1 / 1;
+                max-width: 520px;
+                margin: 0 auto;
+            }
+            .kano-svg-wrapper svg { width: 100%; height: 100%; }
+            /* Chip etiketleri */
+            .kano-chip {
+                position: absolute;
+                padding: 5px 12px;
+                border-radius: 20px;
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 700;
+                font-size: 0.72rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                white-space: nowrap;
+                z-index: 10;
+                border: 1px solid transparent;
+                backdrop-filter: blur(6px);
+            }
+            .kano-chip:hover { transform: scale(1.1); }
+            .kano-chip.chip-delight { background: rgba(249,115,22,0.2); color: #fb923c; border-color: rgba(249,115,22,0.5); }
+            .kano-chip.chip-delight:hover, .kano-chip.chip-delight.active { background: rgba(249,115,22,0.4); border-color: #f97316; box-shadow: 0 0 15px rgba(249,115,22,0.5); color: #fff; }
+            .kano-chip.chip-perf { background: rgba(34,211,238,0.15); color: #22d3ee; border-color: rgba(34,211,238,0.4); }
+            .kano-chip.chip-perf:hover, .kano-chip.chip-perf.active { background: rgba(34,211,238,0.3); border-color: #22d3ee; box-shadow: 0 0 15px rgba(34,211,238,0.5); color: #fff; }
+            .kano-chip.chip-must { background: rgba(239,68,68,0.15); color: #f87171; border-color: rgba(239,68,68,0.4); }
+            .kano-chip.chip-must:hover, .kano-chip.chip-must.active { background: rgba(239,68,68,0.3); border-color: #ef4444; box-shadow: 0 0 15px rgba(239,68,68,0.5); color: #fff; }
+            .kano-chip.chip-reverse { background: rgba(148,163,184,0.1); color: #94a3b8; border-color: rgba(148,163,184,0.3); }
+            .kano-chip.chip-reverse:hover, .kano-chip.chip-reverse.active { background: rgba(148,163,184,0.25); border-color: #94a3b8; box-shadow: 0 0 15px rgba(148,163,184,0.4); color: #fff; }
+
+            /* Sağ panel */
+            .kano-detail-panel {
+                background: linear-gradient(135deg, rgba(10,16,40,0.95), rgba(5,10,25,0.98));
+                border: 1px solid rgba(255,255,255,0.1);
+                border-radius: 20px;
+                padding: 1.5rem;
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                position: sticky;
+                top: 2rem;
+            }
+            .kano-detail-header {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 0.75rem;
+                font-weight: 700;
+                letter-spacing: 2px;
+                color: var(--text-muted);
+                text-transform: uppercase;
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                padding-bottom: 0.75rem;
+            }
+            .kano-detail-cat-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 6px 14px;
+                border-radius: 20px;
+                font-family: 'Montserrat', sans-serif;
+                font-weight: 800;
+                font-size: 0.75rem;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 0.5rem;
+            }
+            .kano-detail-cat-badge.cat-delight { background: rgba(249,115,22,0.2); color: #f97316; border: 1px solid rgba(249,115,22,0.5); }
+            .kano-detail-cat-badge.cat-perf { background: rgba(34,211,238,0.15); color: #22d3ee; border: 1px solid rgba(34,211,238,0.4); }
+            .kano-detail-cat-badge.cat-must { background: rgba(239,68,68,0.15); color: #ef4444; border: 1px solid rgba(239,68,68,0.4); }
+            .kano-detail-cat-badge.cat-reverse { background: rgba(148,163,184,0.1); color: #94a3b8; border: 1px solid rgba(148,163,184,0.3); }
+            .kano-detail-name {
+                font-family: 'Montserrat', sans-serif;
+                font-size: 1.1rem;
+                font-weight: 800;
+                color: #fff;
+                margin-bottom: 0.25rem;
+                line-height: 1.3;
+            }
+            .kano-detail-desc {
+                font-size: 0.82rem;
+                color: #cbd5e1;
+                line-height: 1.65;
+            }
+            .kano-detail-impact {
+                background: rgba(0,0,0,0.3);
+                border-radius: 10px;
+                padding: 0.9rem;
+                border: 1px solid rgba(255,255,255,0.05);
+            }
+            .kano-detail-impact-title {
+                font-size: 0.7rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                color: var(--text-muted);
+                margin-bottom: 0.5rem;
+            }
+            .kano-detail-impact-val {
+                font-size: 0.85rem;
+                color: #e2e8f0;
+                font-weight: 500;
+                line-height: 1.5;
+            }
+            .kano-legend {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-top: 0.5rem;
+            }
+            .kano-legend-item {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 0.7rem;
+                color: var(--text-muted);
+                font-family: 'Montserrat';
+                font-weight: 700;
+            }
+            .kano-legend-dot {
+                width: 10px; height: 10px;
+                border-radius: 50%;
+            }
+            .kano-hint-bar {
+                background: rgba(249,115,22,0.07);
+                border: 1px dashed rgba(249,115,22,0.3);
+                border-radius: 8px;
+                padding: 0.6rem 0.9rem;
+                font-size: 0.75rem;
+                color: #fb923c;
+                text-align: center;
+                font-weight: 600;
+            }
+            @@media (max-width: 1100px) {
+                .kano-matrix-section { grid-template-columns: 1fr; }
+            }
+        </style>
+
+        <div class="kano-matrix-section">
+            <!-- Sol: Matris Kartı -->
+            <div class="kano-matrix-card">
+                <div class="kano-matrix-title">
+                    <span class="title-migros">MİGROS</span> <span class="title-kano">Kano Matrisi</span>
                 </div>
-                <div class="kano-details-card" id="kano-details-content" data-lenis-prevent>
-                    <!-- Injected dynamically -->
+
+                <!-- SVG Matris -->
+                <div class="kano-svg-wrapper">
+                    <svg viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg" id="kano-svg">
+                        <defs>
+                            <!-- Gradyanlar -->
+                            <linearGradient id="grad-delight" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#f97316;stop-opacity:0.1"/>
+                                <stop offset="100%" style="stop-color:#fceabb;stop-opacity:0.5"/>
+                            </linearGradient>
+                            <linearGradient id="grad-must" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#f97316;stop-opacity:0.05"/>
+                                <stop offset="100%" style="stop-color:#f97316;stop-opacity:0.3"/>
+                            </linearGradient>
+                            <linearGradient id="grad-arrow-d" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#c2410c"/>
+                                <stop offset="100%" style="stop-color:#fde68a"/>
+                            </linearGradient>
+                            <linearGradient id="grad-arrow-m" x1="0%" y1="0%" x2="100%" y2="0%">
+                                <stop offset="0%" style="stop-color:#c2410c"/>
+                                <stop offset="100%" style="stop-color:#f97316"/>
+                            </linearGradient>
+                            <filter id="glow-orange">
+                                <feGaussianBlur stdDeviation="3" result="blur"/>
+                                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            <filter id="glow-cyan">
+                                <feGaussianBlur stdDeviation="2.5" result="blur"/>
+                                <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                            </filter>
+                            <marker id="arrow-orange" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#f97316"/>
+                            </marker>
+                            <marker id="arrow-gray" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                                <polygon points="0 0, 10 3.5, 0 7" fill="#475569"/>
+                            </marker>
+                        </defs>
+
+                        <!-- Arka plan ızgara -->
+                        <rect x="50" y="50" width="400" height="400" fill="rgba(255,255,255,0.02)" rx="4"/>
+                        <!-- Yatay ızgara çizgileri -->
+                        <line x1="50" y1="150" x2="450" y2="150" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="50" y1="250" x2="450" y2="250" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="50" y1="350" x2="450" y2="350" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <!-- Dikey ızgara çizgileri -->
+                        <line x1="150" y1="50" x2="150" y2="450" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="250" y1="50" x2="250" y2="450" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,4"/>
+                        <line x1="350" y1="50" x2="350" y2="450" stroke="rgba(255,255,255,0.06)" stroke-width="1" stroke-dasharray="4,4"/>
+
+                        <!-- Çeyrek bölgeler rengi -->
+                        <rect x="50" y="50" width="200" height="200" fill="rgba(249,115,22,0.03)" rx="4"/>
+                        <rect x="250" y="50" width="200" height="200" fill="rgba(34,211,238,0.04)" rx="4"/>
+                        <rect x="50" y="250" width="200" height="200" fill="rgba(148,163,184,0.03)" rx="4"/>
+                        <rect x="250" y="250" width="200" height="200" fill="rgba(239,68,68,0.04)" rx="4"/>
+
+                        <!-- Ana eksenler -->
+                        <!-- Y ekseni (dikey) -->
+                        <line x1="250" y1="30" x2="250" y2="470" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+                        <!-- X ekseni (yatay) -->
+                        <line x1="30" y1="250" x2="470" y2="250" stroke="rgba(255,255,255,0.25)" stroke-width="1.5"/>
+
+                        <!-- Eksen ok başları -->
+                        <polygon points="250,25 244,38 256,38" fill="rgba(255,255,255,0.4)"/>
+                        <polygon points="250,475 244,462 256,462" fill="rgba(255,255,255,0.4)"/>
+                        <polygon points="475,250 462,244 462,256" fill="rgba(255,255,255,0.4)"/>
+                        <polygon points="25,250 38,244 38,256" fill="rgba(255,255,255,0.4)"/>
+
+                        <!-- DAHA ÇOK DAHA İYİ OK (Delighter eğrisine paralel) -->
+                        <line x1="120" y1="380" x2="380" y2="95" stroke="url(#grad-arrow-d)" stroke-width="14" stroke-linecap="round" marker-end="url(#arrow-orange)" opacity="0.85" filter="url(#glow-orange)"/>
+                        <!-- Yazı üstüne -->
+                        <text transform="rotate(-40, 250, 240)" x="210" y="255" fill="rgba(0,0,0,0.9)" font-family="Montserrat" font-weight="900" font-size="11" letter-spacing="2">DAHA ÇOK, DAHA İYİ</text>
+                        <text transform="rotate(-40, 250, 240)" x="209" y="254" fill="#fde68a" font-family="Montserrat" font-weight="900" font-size="11" letter-spacing="2">DAHA ÇOK, DAHA İYİ</text>
+
+                        <!-- OLMAZSA OLMAZ OK (Yatay - sağ alt) -->
+                        <line x1="175" y1="370" x2="440" y2="370" stroke="url(#grad-arrow-m)" stroke-width="12" stroke-linecap="round" marker-end="url(#arrow-orange)" opacity="0.8" filter="url(#glow-orange)"/>
+                        <text x="230" y="392" fill="#f97316" font-family="Montserrat" font-weight="900" font-size="10" letter-spacing="2">OLMAZSA OLMAZ</text>
+
+                        <!-- Delighter eğrisi (sol-alt'tan sağ-üste kıvrımlı) -->
+                        <path d="M 70 440 Q 100 350 160 280 Q 230 190 340 90" fill="none" stroke="#fb923c" stroke-width="2.5" stroke-dasharray="0" opacity="0.9" filter="url(#glow-orange)"/>
+
+                        <!-- Performance eğrisi (düz çizgi diagonal) -->
+                        <path d="M 80 420 Q 180 310 250 250 Q 320 190 420 80" fill="none" stroke="#22d3ee" stroke-width="2" stroke-dasharray="6,3" opacity="0.7"/>
+
+                        <!-- Must-be eğrisi (yatay alt) -->
+                        <path d="M 80 430 Q 160 430 230 390 Q 300 350 440 340" fill="none" stroke="#ef4444" stroke-width="2" stroke-dasharray="5,3" opacity="0.7"/>
+
+                        <!-- Reverse eğrisi (sol-üstten sol-alt'a inen) -->
+                        <path d="M 80 90 Q 90 160 80 250 Q 75 340 90 430" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.6"/>
+
+                        <!-- Merkez KANO çemberi -->
+                        <circle cx="250" cy="250" r="22" fill="rgba(249,115,22,0.15)" stroke="#f97316" stroke-width="1.5"/>
+                        <circle cx="250" cy="250" r="14" fill="rgba(249,115,22,0.3)" stroke="#fde68a" stroke-width="1"/>
+                        <text x="250" y="254" fill="#fff" font-family="Montserrat" font-weight="900" font-size="8" text-anchor="middle">kano</text>
+
+                        <!-- Eksen etiketleri -->
+                        <!-- Tatmin YÜKSEK -->
+                        <text x="250" y="22" fill="#e2e8f0" font-family="Montserrat" font-weight="700" font-size="10" text-anchor="middle">Tatmin</text>
+                        <text x="250" y="34" fill="#a0b0d0" font-family="Montserrat" font-weight="600" font-size="8" text-anchor="middle">YÜKSEK</text>
+                        <!-- Tatmin DÜŞÜK -->
+                        <text x="250" y="483" fill="#64748b" font-family="Montserrat" font-weight="700" font-size="10" text-anchor="middle">Tatmin</text>
+                        <text x="250" y="493" fill="#475569" font-family="Montserrat" font-weight="600" font-size="8" text-anchor="middle">DÜŞÜK</text>
+                        <!-- Performans MÜKEMMEL -->
+                        <text x="490" y="247" fill="#22d3ee" font-family="Montserrat" font-weight="700" font-size="9" text-anchor="middle">Performans</text>
+                        <text x="490" y="258" fill="#0e7490" font-family="Montserrat" font-weight="600" font-size="7.5" text-anchor="middle">MÜKEMMEL</text>
+                        <!-- Performans ZAYIF -->
+                        <text x="12" y="247" fill="#475569" font-family="Montserrat" font-weight="700" font-size="9" text-anchor="middle">Perf.</text>
+                        <text x="12" y="258" fill="#334155" font-family="Montserrat" font-weight="600" font-size="7.5" text-anchor="middle">ZAYIF</text>
+
+                        <!-- Etiketler / bölge açıklamaları -->
+                        <!-- Heyecan verici (sol üst) -->
+                        <rect x="55" y="58" width="175" height="18" rx="4" fill="rgba(249,115,22,0.1)"/>
+                        <text x="64" y="70" fill="#fb923c" font-family="Montserrat" font-weight="800" font-size="9">✦ Heyecan Verici Özellikler</text>
+                        <!-- Performans (sağ üst) -->
+                        <rect x="290" y="58" width="155" height="18" rx="4" fill="rgba(34,211,238,0.08)"/>
+                        <text x="300" y="70" fill="#22d3ee" font-family="Montserrat" font-weight="800" font-size="9">⚡ Performans Özellikleri</text>
+                        <!-- Performans zayıf (sol alt) -->
+                        <text x="60" y="460" fill="#475569" font-family="Montserrat" font-weight="700" font-size="9">Performans ZAYIF</text>
+                        <!-- Ters (sol üst arka) -->
+                        <text x="60" y="110" fill="#334155" font-family="Montserrat" font-weight="700" font-size="8.5">⬤ Ters Özellikler</text>
+
+                        <!-- İnteraktif nokta: Money App (Delighter) -->
+                        <circle id="dot-money" cx="155" cy="120" r="9" fill="#fb923c" stroke="#fde68a" stroke-width="2" style="cursor:pointer;" filter="url(#glow-orange)" class="kano-dot" data-req="FR-06"/>
+                        <circle id="dot-money-pulse" cx="155" cy="120" r="16" fill="none" stroke="#f97316" stroke-width="1" opacity="0.5" class="kano-pulse-ring"/>
+
+                        <!-- İnteraktif nokta: Sanal Market Seçim (Performance) -->
+                        <circle id="dot-sepet" cx="360" cy="130" r="8" fill="#22d3ee" stroke="#a5f3fc" stroke-width="1.5" style="cursor:pointer;" filter="url(#glow-cyan)" class="kano-dot" data-req="FR-04"/>
+                        <circle id="dot-sepet2" cx="390" cy="155" r="7" fill="#22d3ee" stroke="#a5f3fc" stroke-width="1.5" style="cursor:pointer;" filter="url(#glow-cyan)" class="kano-dot" data-req="NFR-ACC"/>
+                        <circle id="dot-sepet-pulse" cx="360" cy="130" r="14" fill="none" stroke="#22d3ee" stroke-width="1" opacity="0.4" class="kano-pulse-ring"/>
+
+                        <!-- İnteraktif nokta: Barkod (Must-Be) -->
+                        <circle id="dot-barkod" cx="310" cy="340" r="8" fill="#ef4444" stroke="#fca5a5" stroke-width="1.5" style="cursor:pointer;" class="kano-dot" data-req="FR-01"/>
+                        <circle id="dot-hiz" cx="355" cy="342" r="7" fill="#ef4444" stroke="#fca5a5" stroke-width="1.5" style="cursor:pointer;" class="kano-dot" data-req="NFR-SPEED"/>
+                        <circle id="dot-kvkk" cx="400" cy="344" r="7" fill="#ef4444" stroke="#fca5a5" stroke-width="1.5" style="cursor:pointer;" class="kano-dot" data-req="NFR-SEC"/>
+                        <circle id="dot-barkod-pulse" cx="310" cy="340" r="14" fill="none" stroke="#ef4444" stroke-width="1" opacity="0.4" class="kano-pulse-ring"/>
+
+                        <!-- İnteraktif nokta: Ters (Reverse) -->
+                        <circle id="dot-ters" cx="82" cy="390" r="7" fill="#475569" stroke="#94a3b8" stroke-width="1.5" style="cursor:pointer;" class="kano-dot" data-req="TERS-01"/>
+                    </svg>
+
+                    <!-- Chip etiketleri (absolute konumlu) -->
+                    <div class="kano-chip chip-delight active" id="chip-FR-06"
+                         style="top:18%; left:24%;"
+                         onclick="selectKanoChip('FR-06')">📱 Money App Bildirimi</div>
+
+                    <div class="kano-chip chip-perf" id="chip-FR-04"
+                         style="top:22%; right:6%;"
+                         onclick="selectKanoChip('FR-04')">🛒 Sanal Market Seçim</div>
+
+                    <div class="kano-chip chip-perf" id="chip-NFR-ACC"
+                         style="top:30%; right:3%;"
+                         onclick="selectKanoChip('NFR-ACC')">🎯 Doğruluk / Kesinlik</div>
+
+                    <div class="kano-chip chip-must" id="chip-FR-01"
+                         style="bottom:24%; left:52%;"
+                         onclick="selectKanoChip('FR-01')">📊 Barkod Çözümleme</div>
+
+                    <div class="kano-chip chip-must" id="chip-NFR-SPEED"
+                         style="bottom:24%; right:8%;"
+                         onclick="selectKanoChip('NFR-SPEED')">⚡ Performans / Hız</div>
+
+                    <div class="kano-chip chip-must" id="chip-NFR-SEC"
+                         style="bottom:22%; right:-2%;"
+                         onclick="selectKanoChip('NFR-SEC')">🔒 Güvenlik / KVKK</div>
+
+                    <div class="kano-chip chip-reverse" id="chip-TERS-01"
+                         style="bottom:14%; left:2%;"
+                         onclick="selectKanoChip('TERS-01')">😠 Tek Tek SKT Tercihi</div>
+                </div>
+
+                <!-- Legend -->
+                <div class="kano-legend" style="margin-top:1.2rem; justify-content:center;">
+                    <div class="kano-legend-item"><div class="kano-legend-dot" style="background:#fb923c;"></div>Heyecan Verici</div>
+                    <div class="kano-legend-item"><div class="kano-legend-dot" style="background:#22d3ee;"></div>Performans</div>
+                    <div class="kano-legend-item"><div class="kano-legend-dot" style="background:#ef4444;"></div>Olmazsa Olmaz</div>
+                    <div class="kano-legend-item"><div class="kano-legend-dot" style="background:#475569;"></div>Ters Özellik</div>
+                </div>
+            </div>
+
+            <!-- Sağ: Detay Paneli -->
+            <div class="kano-detail-panel" id="kano-detail-panel">
+                <div class="kano-detail-header"><i class="bi bi-cursor-fill"></i>&nbsp; SEÇİLİ GEREKSİNİM</div>
+
+                <div id="kano-detail-body">
+                    <div class="kano-detail-cat-badge cat-delight" id="kano-cat-badge">
+                        <i class="bi bi-stars"></i> Heyecan Verici
+                    </div>
+                    <div class="kano-detail-name" id="kano-det-name">📱 Money App Bildirimi</div>
+                    <div class="kano-detail-desc" id="kano-det-desc">
+                        Money Kart ile taze gıda satın alan müşterilere, ürünün SKT'sine <strong>1 gün kala</strong> Money mobil uygulaması üzerinden otomatik push bildirimi veya SMS ile tüketim hatırlatması gönderilir.
+                    </div>
+                    <div class="kano-detail-impact">
+                        <div class="kano-detail-impact-title"><i class="bi bi-lightning-charge-fill"></i> Kano Etkisi</div>
+                        <div class="kano-detail-impact-val" id="kano-det-impact">
+                            Var olduğunda: <strong style="color:#fb923c">Çok yüksek memnuniyet</strong> (WOW etkisi)<br>
+                            Olmadığında: Memnuniyetsizlik yaratmaz
+                        </div>
+                    </div>
+                    <div class="kano-detail-impact" style="margin-top:0.5rem;">
+                        <div class="kano-detail-impact-title"><i class="bi bi-tag-fill"></i> Gereksinim ID</div>
+                        <div class="kano-detail-impact-val" id="kano-det-id">FR-06 (Fonksiyonel)</div>
+                    </div>
+                </div>
+
+                <div class="kano-hint-bar">
+                    <i class="bi bi-hand-index-fill"></i> Grafikteki etiket veya noktaya tıklayın
                 </div>
             </div>
         </div>
+
+        <!-- Kano Matris JS -->
+        <script>
+        (function() {
+            var kanoData = {
+                'FR-06': {
+                    cat: 'delight', catLabel: 'Heyecan Verici', catIcon: 'bi-stars',
+                    name: '📱 Money App Bildirimi',
+                    desc: 'Money Kart ile taze gıda satın alan müşterilere, ürünün SKT\'sine <strong>1 gün kala</strong> Money mobil uygulaması üzerinden otomatik push bildirimi veya SMS ile tüketim hatırlatması gönderilir.',
+                    impact: 'Var olduğunda: <strong style="color:#fb923c">Çok yüksek memnuniyet</strong> (WOW etkisi)<br>Olmadığında: Memnuniyetsizlik yaratmaz',
+                    id: 'FR-06 (Fonksiyonel)'
+                },
+                'FR-04': {
+                    cat: 'perf', catLabel: 'Performans', catIcon: 'bi-graph-up',
+                    name: '🛒 Sanal Market Seçim Ekranı',
+                    desc: 'Müşteriye kritik gıdalarda <strong>"En Az 5 Gün SKT Garantili"</strong> (standart fiyat) veya <strong>"%20 İndirimli Yakın SKT Fırsatı"</strong> seçenekleri sunulur. Seçim kalitesi arttıkça memnuniyet doğrusal yükselir.',
+                    impact: 'Var olduğunda: <strong style="color:#22d3ee">Memnuniyet artar</strong><br>Olmadığında: Orantılı memnuniyetsizlik',
+                    id: 'FR-04 (Fonksiyonel)'
+                },
+                'NFR-ACC': {
+                    cat: 'perf', catLabel: 'Performans', catIcon: 'bi-graph-up',
+                    name: '🎯 Doğruluk / Kesinlik',
+                    desc: 'Barkod ayrıştırma, tarih karşılaştırma ve indirim hesaplama motorlarının hata payı <strong>%99.99</strong> doğruluk oranında olmalıdır. 10.000 işlemde en fazla 1 hatalı karar.',
+                    impact: 'Var olduğunda: <strong style="color:#22d3ee">Artan güven ve memnuniyet</strong><br>Olmadığında: Orantılı hayal kırıklığı',
+                    id: 'NFR-07 (Fonksiyonel Olmayan)'
+                },
+                'FR-01': {
+                    cat: 'must', catLabel: 'Olmazsa Olmaz', catIcon: 'bi-exclamation-triangle-fill',
+                    name: '📊 Barkod Çözümleme',
+                    desc: 'Kasada veya Sanal Market toplama uygulamasında okutulan ürünün barkod yapısından ürün kimliği, net gramajı ve <strong>SKT verilerini</strong> otomatik olarak ayrıştırabilmelidir.',
+                    impact: 'Var olduğunda: Temel beklenti karşılanır (tarafsız)<br>Olmadığında: <strong style="color:#ef4444">Kritik memnuniyetsizlik</strong>',
+                    id: 'FR-01 (Fonksiyonel)'
+                },
+                'NFR-SPEED': {
+                    cat: 'must', catLabel: 'Olmazsa Olmaz', catIcon: 'bi-exclamation-triangle-fill',
+                    name: '⚡ Performans / Hız',
+                    desc: 'Barkod tarama anından SKT doğrulama ve blokaj/indirim kararının ekrana yansıma süresi <strong>150 ms</strong> altında olmalıdır. Kasa önünde kuyruk oluşmasını engellemek için kritik.',
+                    impact: 'Var olduğunda: Beklenti karşılanır<br>Olmadığında: <strong style="color:#ef4444">Sistem kullanılamaz hale gelir</strong>',
+                    id: 'NFR-01 (Fonksiyonel Olmayan)'
+                },
+                'NFR-SEC': {
+                    cat: 'must', catLabel: 'Olmazsa Olmaz', catIcon: 'bi-exclamation-triangle-fill',
+                    name: '🔒 Güvenlik / KVKK',
+                    desc: 'Money Kart entegrasyonu ve SMS/App gönderimi süreçlerinde kişisel veriler maskelenmeli, tüm veri transferleri <strong>256-bit AES</strong> şifreli kanallardan aktarılmalıdır.',
+                    impact: 'Var olduğunda: Yasal uyumluluk sağlanır<br>Olmadığında: <strong style="color:#ef4444">Yasal yaptırım ve güven kaybı</strong>',
+                    id: 'NFR-03 (Fonksiyonel Olmayan)'
+                },
+                'TERS-01': {
+                    cat: 'reverse', catLabel: 'Ters Özellik', catIcon: 'bi-x-circle-fill',
+                    name: '😠 Tek Tek SKT Tercihi Zorunluluğu',
+                    desc: 'Sanal Market Sepetindeki her ürün için tek tek SKT tercihi yapmaya zorlamak. Bu özellik müşteriyi yorucu bir süreçle karşı karşıya bırakır ve alışverişi caydırıcı hale getirir.',
+                    impact: 'Var olduğunda: <strong style="color:#94a3b8">Memnuniyeti DÜŞÜRÜR</strong><br>Olmadığında: Memnuniyet artar',
+                    id: 'TERS-01 (Tasarım Kararı)'
+                }
+            };
+
+            var catClasses = { delight: 'cat-delight', perf: 'cat-perf', must: 'cat-must', reverse: 'cat-reverse' };
+            var catLabels = { delight: 'Heyecan Verici', perf: 'Performans', must: 'Olmazsa Olmaz', reverse: 'Ters Özellik' };
+
+            function updatePanel(key) {
+                var d = kanoData[key];
+                if (!d) return;
+                var badge = document.getElementById('kano-cat-badge');
+                badge.className = 'kano-detail-cat-badge ' + catClasses[d.cat];
+                badge.innerHTML = '<i class="bi ' + d.catIcon + '"></i> ' + d.catLabel;
+                document.getElementById('kano-det-name').innerHTML = d.name;
+                document.getElementById('kano-det-desc').innerHTML = d.desc;
+                document.getElementById('kano-det-impact').innerHTML = d.impact;
+                document.getElementById('kano-det-id').innerHTML = d.id;
+
+                // Chip aktif sınıfı
+                document.querySelectorAll('.kano-chip').forEach(function(c) { c.classList.remove('active'); });
+                var chip = document.getElementById('chip-' + key);
+                if (chip) chip.classList.add('active');
+            }
+
+            window.selectKanoChip = function(key) { updatePanel(key); };
+
+            // SVG nokta tıklama
+            document.querySelectorAll('.kano-dot').forEach(function(dot) {
+                dot.addEventListener('click', function() {
+                    var key = this.getAttribute('data-req');
+                    if (key) updatePanel(key);
+                });
+            });
+
+            // Pulse animasyonu
+            var pulseRings = document.querySelectorAll('.kano-pulse-ring');
+            var scale = 1;
+            var growing = true;
+            setInterval(function() {
+                if (growing) { scale += 0.015; if (scale >= 1.3) growing = false; }
+                else { scale -= 0.015; if (scale <= 1.0) growing = true; }
+                pulseRings.forEach(function(r) {
+                    r.style.transform = 'scale(' + scale + ')';
+                    r.style.opacity = (1.3 - scale) * 1.5;
+                });
+            }, 30);
+
+            // İlk yükleme
+            updatePanel('FR-06');
+        })();
+        </script>
 
         <div class="section-title">5. KULLANICI HİKAYELERİ (USER STORY)</div>
         <div class="story-nav">
