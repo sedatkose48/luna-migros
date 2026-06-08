@@ -3039,7 +3039,7 @@
             }
             const delightCurve = new THREE.CatmullRomCurve3(delightPoints);
             const delightGeom = new THREE.TubeGeometry(delightCurve, 100, 0.025, 12, false);
-            const delightMat = new THREE.MeshPhongMaterial({ color: 0x34d399, emissive: 0x004422, shininess: 60 });
+            const delightMat = new THREE.MeshPhongMaterial({ color: 0x4ade80, emissive: 0x166534, shininess: 60 });
             const delightMesh = new THREE.Mesh(delightGeom, delightMat);
             kanoGroup.add(delightMesh);
             
@@ -3058,7 +3058,7 @@
                 { id: 'NFR-ACC', label: 'NFR\nKesinlik', x: 1.4, y: 1.03, z: 0, color: 0x22d3ee, curve: 'perf' }, 
                 
                 // Delighter düğümü (yeşil eğri üzerinde)
-                { id: 'FR-06', label: 'FR-06\nMoney App', x: 2.0, y: 1.50, z: 0, color: 0x34d399, curve: 'delight' }
+                { id: 'FR-06', label: 'FR-06\nMoney App', x: 2.0, y: 1.50, z: 0, color: 0x4ade80, curve: 'delight' }
             ];
             
             const nodeMeshes = [];
@@ -3128,8 +3128,8 @@
                     <span style="color:#22d3ee; font-weight:700;">Performans (Linear)</span>
                 </div>
                 <div style="display:flex; align-items:center; gap:6px;">
-                    <span style="width:18px; height:3px; background:#34d399; border-radius:2px; display:inline-block;"></span>
-                    <span style="color:#34d399; font-weight:700;">Çekici (Delighter)</span>
+                    <span style="width:18px; height:3px; background:#4ade80; border-radius:2px; display:inline-block;"></span>
+                    <span style="color:#4ade80; font-weight:700;">Çekici (Delighter)</span>
                 </div>
             `;
             container.appendChild(legendDiv);
