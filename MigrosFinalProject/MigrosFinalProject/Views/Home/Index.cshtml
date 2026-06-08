@@ -1,0 +1,3285 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LUNA - Çözüm Mimarisi Kataloğu</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'dark',
+            themeVariables: { primaryColor: '#0d1635', edgeColor: '#3a7bd5', lineColor: '#22d3ee', fontFamily: 'Poppins' }
+        });
+    </script>
+    
+    <!-- Three.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- Lenis Smooth Scroll CDN -->
+    <script src="https://unpkg.com/@@studio-freight/lenis@@1.0.42/dist/lenis.min.js"></script>
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Poppins:wght@300;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* === 1. TEMEL DEĞİŞKENLER VE SIFIRLAMA === */
+        :root {
+            --bg-deep: #050914; --bg-glow: #0b132b;
+            --card-bg: rgba(13, 22, 53, 0.65); --card-border: rgba(70, 130, 255, 0.4);
+            --text-main: #ffffff; --text-muted: #a0b0d0;
+            --gold-gradient: linear-gradient(90deg, #fceabb, #f8b500);
+            --blue-accent: #3a7bd5; --cyan-accent: #22d3ee; --green-accent: #34d399;
+            --red-accent: #ef4444; --yellow-accent: #eab308; --orange-accent: #f97316;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background-color: var(--bg-deep); background-image: radial-gradient(circle at 50% 50%, var(--bg-glow) 0%, var(--bg-deep) 100%);
+            color: var(--text-main); font-family: 'Poppins', sans-serif;
+            overflow-x: hidden; min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; position: relative;
+        }
+        .content-wrapper { position: relative; z-index: 1; width: 100%; max-width: 1400px; display: flex; flex-direction: column; align-items: center; padding: 2rem 1rem; }
+        .header { margin-bottom: 3rem; text-align: center; animation: slideDown 1s ease-out; }
+        .header h1 { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; font-weight: 900; letter-spacing: 2px; line-height: 1.1; text-transform: uppercase; }
+        .header h1 .gold-text { background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0px 0px 20px rgba(248, 181, 0, 0.3); display: block; }
+        .section-title { font-family: 'Montserrat', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--cyan-accent); margin: 3rem 0 2rem; text-align: left; text-transform: uppercase; border-left: 5px solid var(--cyan-accent); padding-left: 1rem; width: 100%; }
+
+        #particles-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: rgba(70, 130, 255, 0.4); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(34, 211, 238, 0.8); }
+
+        /* === BÖLÜM 1-3: 3M, EBO, RACI STİLLERİ === */
+        .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1.5rem; width: 100%; margin-bottom: 2rem;}
+        .analysis-card { background: var(--card-bg); border: 1px solid rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 15px; display: flex; flex-direction: column; gap: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .analysis-card.muda { border-left: 4px solid var(--red-accent); }
+        .analysis-card.mura { border-left: 4px solid var(--yellow-accent); }
+        .analysis-card.muri { border-left: 4px solid var(--orange-accent); }
+        
+        .card-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem; }
+        .card-header h3 { font-family: 'Montserrat'; font-size: 1.1rem; color: #fff; }
+        .card-badge { padding: 3px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: bold; }
+        .badge-red { background: rgba(239, 68, 68, 0.15); color: var(--red-accent); }
+        .analysis-card p { font-size: 0.85rem; color: #cbd5e1; line-height: 1.5; }
+        .analysis-card ul { padding-left: 1rem; }
+        .analysis-card li { font-size: 0.85rem; color: #cbd5e1; margin-bottom: 0.3rem;}
+
+        .ebo-container { width: 100%; display: flex; flex-direction: column; gap: 2rem; margin-bottom: 2rem;}
+        .data-table { width: 100%; border-collapse: collapse; background: var(--card-bg); font-size: 0.85rem; border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .data-table th, .data-table td { padding: 1rem; text-align: left; border: 1px solid rgba(255,255,255,0.05); color: #cbd5e1;}
+        .data-table td strong { color: #fff; }
+        .table-eliminate th { background: linear-gradient(90deg, rgba(239, 68, 68, 0.2), transparent); color: var(--red-accent); border-bottom: 2px solid var(--red-accent); }
+        .table-simplify th { background: linear-gradient(90deg, rgba(59, 130, 246, 0.2), transparent); color: var(--blue-accent); border-bottom: 2px solid var(--blue-accent); }
+        .table-optimize th { background: linear-gradient(90deg, rgba(34, 197, 94, 0.2), transparent); color: var(--green-accent); border-bottom: 2px solid var(--green-accent); }
+
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; background: var(--card-bg); padding: 1.5rem; border-radius: 15px; border: 1px solid var(--cyan-accent); box-shadow: 0 10px 30px rgba(0,0,0,0.3); margin-bottom: 2rem;}
+        .matrix-cell { padding: 1.5rem; border-radius: 12px; background: rgba(0,0,0,0.4); border: 1px dashed rgba(255,255,255,0.2); }
+        .matrix-cell h4 { font-family: 'Montserrat'; font-size: 0.95rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .matrix-cell ul { list-style: none; font-size: 0.85rem; color: #cbd5e1; }
+        .matrix-cell li { margin-bottom: 0.5rem; padding-left: 15px; position: relative; }
+        .matrix-cell li::before { content: "▸"; position: absolute; left: 0; color: var(--cyan-accent); }
+
+        .raci-table th { background: rgba(34, 211, 238, 0.1); color: var(--cyan-accent); text-align: center; }
+        .raci-table td { text-align: center; }
+        .raci-table td:first-child { text-align: left; font-weight: 500; color: #fff; }
+        .r-A { background: rgba(239, 68, 68, 0.15); color: var(--red-accent); padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .r-R { background: rgba(245, 158, 11, 0.15); color: var(--yellow-accent); padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .r-C { background: rgba(59, 130, 246, 0.15); color: var(--blue-accent); padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+        .r-I { background: rgba(148, 163, 184, 0.15); color: #94a3b8; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+
+        /* === BÖLÜM 4: PERSONA, EMPATİ & HMW === */
+        .persona-wrapper { width: 100%; display: grid; grid-template-columns: 350px 1fr 350px; gap: 1.5rem; align-items: stretch; margin-bottom: 5rem;}
+        .prs-col { background: #0d1635; border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 2rem; box-shadow: 0 15px 35px rgba(0,0,0,0.5); display: flex; flex-direction: column; }
+        .prs-col.border-cyan { border-color: var(--cyan-accent); }
+        .prs-col.border-blue { border-color: var(--blue-accent); }
+        .prs-col.border-gold { border-color: #f8b500; }
+
+        .prs-badge { background: rgba(34, 211, 238, 0.1); color: var(--cyan-accent); padding: 0.3rem 0.8rem; border-radius: 5px; font-weight: 700; font-size: 0.8rem; display: inline-block; margin-bottom: 1rem; align-self: flex-start;}
+        .prs-name { font-family: 'Montserrat', sans-serif; font-size: 2.5rem; font-weight: 900; color: #fff; margin-bottom: 0.5rem; line-height: 1; }
+        .prs-title { font-size: 1.1rem; color: var(--cyan-accent); font-weight: 500; margin-bottom: 2rem; }
+        .prs-quote-main { border-left: 4px solid var(--cyan-accent); padding-left: 1rem; font-style: italic; color: #e2e8f0; margin-bottom: 2rem; font-size: 0.95rem; line-height: 1.5;}
+        .prs-info-grid { display: grid; grid-template-columns: 90px 1fr; gap: 0.8rem 0; margin-bottom: 2rem; font-size: 0.85rem; }
+        .prs-info-label { color: var(--text-muted); font-weight: 700; }
+        .prs-info-val { color: #fff; font-weight: 500; }
+        .prs-list-title { font-family: 'Montserrat', sans-serif; font-size: 0.85rem; color: var(--cyan-accent); margin-bottom: 1rem; font-weight: 700; text-transform: uppercase; margin-top: 1.5rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1.5rem;}
+        .prs-list ul { list-style: none; }
+        .prs-list li { margin-bottom: 0.6rem; font-size: 0.8rem; color: #cbd5e1; display: flex; align-items: flex-start; gap: 8px; line-height: 1.4;}
+        .prs-list .check { color: var(--green-accent); font-weight: bold; }
+        .prs-list .cross { color: #ff4b4b; font-weight: bold; }
+
+        .emp-header { text-align: center; margin-bottom: 2rem; flex: 0 0 auto; }
+        .emp-header h3 { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase;}
+        .emp-header h2 { font-family: 'Montserrat', sans-serif; font-size: 1.6rem; color: var(--blue-accent); font-weight: 900; text-transform: uppercase; }
+        .emp-map-container { display: flex; flex-direction: column; gap: 1.5rem; width: 100%; flex-grow: 1; justify-content: space-between;}
+        .emp-middle-row { display: flex; align-items: stretch; justify-content: space-between; gap: 1rem; width: 100%; flex: 1; }
+        .emp-bottom-row { display: flex; align-items: stretch; gap: 1rem; width: 100%; flex: 1; }
+        .emp-avatar { flex-shrink: 0; display: flex; justify-content: center; align-items: center; padding: 0 10px;}
+        .emp-avatar img { width: 120px; height: 120px; border-radius: 50%; border: 4px solid var(--blue-accent); box-shadow: 0 0 15px rgba(58, 123, 213, 0.4); object-fit: cover; }
+        .emp-box { background: rgba(0,0,0,0.3); padding: 1.2rem; border-radius: 12px; border-left: 3px solid var(--blue-accent); }
+        .emp-box.thinks { flex: 0 0 auto; border-color: #a855f7; } 
+        .emp-middle-row .emp-box, .emp-bottom-row .emp-box { flex: 1; } 
+        .emp-box.sees { border-color: #3b82f6; } .emp-box.hears { border-color: #eab308; } .emp-box.does { border-color: #22c55e; } .emp-box.feels { border-color: #ef4444; }
+        .emp-box-title { font-weight: 700; font-size: 0.85rem; margin-bottom: 0.6rem; display: flex; align-items: center; gap: 6px; text-transform: uppercase;}
+        .thinks .emp-box-title { color: #a855f7; } .sees .emp-box-title { color: #3b82f6; } .hears .emp-box-title { color: #eab308; } .does .emp-box-title { color: #22c55e; } .feels .emp-box-title { color: #ef4444; }
+        .emp-box ul { list-style: none; padding: 0; }
+        .emp-box li { font-size: 0.8rem; color: #cbd5e1; margin-bottom: 0.5rem; padding-left: 12px; position: relative; line-height: 1.4; }
+        .emp-box li::before { content: "•"; position: absolute; left: 0; top: 0; font-size: 1rem; line-height: 1;}
+        .thinks li::before { color: #a855f7; } .sees li::before { color: #3b82f6; } .hears li::before { color: #eab308; } .does li::before { color: #22c55e; } .feels li::before { color: #ef4444; }
+
+        .hmw-header { text-align: center; margin-bottom: 2rem; flex: 0 0 auto; }
+        .hmw-header h3 { color: var(--text-muted); font-size: 0.85rem; letter-spacing: 2px; text-transform: uppercase;}
+        .hmw-header h2 { font-family: 'Montserrat', sans-serif; font-size: 1.6rem; color: #f8b500; font-weight: 900; text-transform: uppercase; }
+        .hmw-item { background: rgba(0,0,0,0.4); padding: 1.5rem 1.2rem; border-radius: 12px; margin-bottom: 1rem; font-size: 0.9rem; color: #fff; border-left: 4px solid #f8b500; line-height: 1.6; box-shadow: inset 0 0 10px rgba(248, 181, 0, 0.05); flex: 1; display: flex; flex-direction: column; justify-content: center; }
+        .hmw-item:last-child { margin-bottom: 0; }
+        .hmw-item strong { color: #f8b500; display: block; margin-bottom: 5px; font-size: 0.95rem;}
+        .hmw-item i { color: var(--text-muted); display: block; margin-top: 8px; font-size: 0.8rem; }
+
+        /* === BÖLÜM 5: USER STORY (PANEL MANTIĞI) === */
+        .story-nav { display: flex; align-items: center; justify-content: center; gap: 2rem; margin-bottom: 1rem; width: 100%; max-width: 850px; }
+        .nav-btn { background: rgba(70, 130, 255, 0.1); border: 1px solid var(--card-border); color: #fff; font-size: 1.5rem; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 15px rgba(70, 130, 255, 0.2); }
+        .nav-btn:hover { background: rgba(70, 130, 255, 0.3); transform: scale(1.1); box-shadow: 0 0 20px var(--cyan-accent); }
+        .story-indicator { font-family: 'Montserrat', sans-serif; font-weight: 700; color: var(--cyan-accent); letter-spacing: 2px; font-size: 1.1rem;}
+
+        .main-stage { display: flex; gap: 2rem; width: 100%; justify-content: center; align-items: flex-start; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); margin-bottom: 5rem; }
+        .story-wrapper { width: 100%; max-width: 850px; transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); }
+        .main-stage.panel-active .story-wrapper { max-width: 680px; }
+        .story-board { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5); position: relative; overflow: hidden; min-height: 420px; }
+        
+        .fade-content { opacity: 1; transition: opacity 0.3s ease, transform 0.3s ease; transform: translateY(0); }
+        .fade-out { opacity: 0; transform: translateY(10px); }
+
+        .story-row { display: flex; align-items: center; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 1.2rem; margin-bottom: 1.2rem; transition: all 0.3s ease; }
+        .story-row:hover { transform: translateX(10px); background: rgba(70, 130, 255, 0.1); border-color: rgba(70, 130, 255, 0.3); box-shadow: 0 0 20px rgba(70, 130, 255, 0.2); }
+        .row-left { display: flex; align-items: center; gap: 15px; width: 240px; font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 700; }
+        .row-icon { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--card-border); display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.05); box-shadow: 0 0 15px rgba(70, 130, 255, 0.3); }
+        .row-label-sub { font-size: 0.75rem; color: var(--text-muted); font-weight: 300; margin-left: 5px; }
+        .arrow { color: var(--blue-accent); font-size: 1.5rem; font-weight: bold; margin-right: 15px; }
+        .row-right { flex: 1; font-size: 0.95rem; line-height: 1.5; }
+        .highlight { color: #f8b500; font-weight: 700; }
+
+        .action-buttons { display: flex; gap: 1rem; margin-top: 1.5rem; justify-content: center; }
+        .btn { background: rgba(13, 22, 53, 0.8); border: 1px solid var(--card-border); color: var(--text-main); font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9rem; padding: 0.8rem 1.5rem; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
+        .btn:hover, .btn.active { background: rgba(70, 130, 255, 0.2); border-color: var(--cyan-accent); box-shadow: 0 0 20px rgba(34, 211, 238, 0.4); transform: translateY(-2px); }
+
+        .side-panel { width: 0; opacity: 0; visibility: hidden; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 0; backdrop-filter: blur(12px); transform: translateX(50px); transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1); overflow-y: auto; max-height: 600px; }
+        .main-stage.panel-active .side-panel { width: 480px; opacity: 1; visibility: visible; transform: translateX(0); padding: 2rem; }
+        .panel-content { display: none; animation: fadeIn 0.5s ease forwards; }
+        .panel-content.active { display: block; }
+        .panel-title { font-family: 'Montserrat', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 1.5rem; color: var(--cyan-accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; transition: color 0.3s; }
+        .invest-grid { display: grid; grid-template-columns: 1fr; gap: 0.8rem; }
+        .invest-item { background: rgba(0,0,0,0.3); border-left: 3px solid var(--gold-gradient); padding: 0.8rem 1rem; border-radius: 0 8px 8px 0; display: flex; align-items: center; gap: 15px; }
+        .invest-letter { font-family: 'Montserrat', sans-serif; font-size: 1.5rem; font-weight: 900; color: #f8b500; width: 30px; text-align: center; text-shadow: 0 0 10px rgba(248, 181, 0, 0.5); }
+        .invest-desc strong { color: var(--text-main); font-size: 0.9rem; display: block; }
+        .invest-desc span { color: var(--text-muted); font-size: 0.8rem; }
+        .gherkin-scenario { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); border-radius: 10px; padding: 1.2rem; margin-bottom: 1.2rem; }
+        .scenario-title { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 10px; display: block; }
+        .g-line { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; margin-bottom: 6px; line-height: 1.5; }
+        .g-line .kw { font-weight: 700; display: inline-block; width: 55px; }
+        .g-given .kw { color: #f8b500; } .g-when .kw { color: var(--cyan-accent); } .g-then .kw { color: var(--green-accent); }
+
+        /* === 6. UML MİMARİSİ BÖLÜMÜ === */
+        .architecture-stage { display: flex; gap: 2rem; width: 100%; justify-content: space-between; align-items: stretch; margin-bottom: 5rem; }
+        .uml-container { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; display: flex; justify-content: center; align-items: center; overflow-x: auto; }
+        .specs-container { flex: 1; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px; padding: 2rem; overflow-y: auto; max-height: 600px; }
+        .spec-card { background: rgba(0, 0, 0, 0.3); border-left: 4px solid var(--cyan-accent); padding: 1.5rem; border-radius: 0 12px 12px 0; margin-bottom: 1.5rem; }
+        .spec-title { font-family: 'Montserrat', sans-serif; font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 1rem; display: flex; align-items: center; gap: 10px; }
+        .spec-title span { background: rgba(34, 211, 238, 0.15); color: var(--cyan-accent); padding: 0.2rem 0.6rem; border-radius: 5px; font-size: 0.8rem; }
+        .spec-line { font-size: 0.85rem; margin-bottom: 0.8rem; line-height: 1.6; }
+        .spec-label { font-weight: 700; font-family: 'JetBrains Mono', monospace; display: block; margin-bottom: 0.2rem; }
+        .lbl-pre { color: #f8b500; } .lbl-alt { color: var(--blue-accent); } .lbl-exc { color: #ff4b4b; } .lbl-post { color: var(--green-accent); }
+        .mermaid { width: 100%; display: flex; justify-content: center; align-items: center; }
+
+        /* === 7. STORYBOARD BÖLÜMÜ === */
+        .storyboard-container { width: 100%; margin: 0 auto 5rem; display: flex; flex-direction: column; gap: 4rem; }
+        .sb-section { background: rgba(10, 15, 35, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; padding: 3rem 2rem; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        .sb-main-title { text-align: center; font-family: 'Montserrat', sans-serif; font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 1px; }
+        .sb-main-title span { color: #f8b500; text-shadow: 0 0 15px rgba(248, 181, 0, 0.4); }
+        .sb-subtitle { text-align: center; color: var(--text-muted); font-size: 1rem; margin-bottom: 3rem; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .sb-subtitle::before, .sb-subtitle::after { content: ""; width: 50px; height: 1px; background: rgba(255,255,255,0.2); }
+        .sb-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; row-gap: 40px; }
+        .sb-panel { position: relative; border-radius: 16px; background: #0d1635; display: flex; flex-direction: column; overflow: visible; }
+        .sb-panel::before { content: ""; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px; z-index: -1; border-radius: 18px; }
+        .sb-panel.theme-purple::before { background: linear-gradient(135deg, #7c3aed, #4c1d95); box-shadow: 0 0 15px rgba(124, 58, 237, 0.3); }
+        .sb-panel.theme-blue::before { background: linear-gradient(135deg, #2563eb, #1e3a8a); box-shadow: 0 0 15px rgba(37, 99, 235, 0.3); }
+        .sb-panel.theme-green::before { background: linear-gradient(135deg, #10b981, #065f46); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3); }
+        .sb-panel.theme-yellow::before { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 0 15px rgba(245, 158, 11, 0.3); }
+        .sb-header { display: flex; align-items: center; padding: 12px 15px; gap: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .sb-num { width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'Montserrat', sans-serif; font-weight: 900; font-size: 1.1rem; color: #fff; background: rgba(255,255,255,0.2); }
+        .theme-purple .sb-num { background: #7c3aed; } .theme-blue .sb-num { background: #2563eb; } .theme-green .sb-num { background: #10b981; } .theme-yellow .sb-num { background: #f59e0b; }
+        .sb-phase { font-family: 'Montserrat', sans-serif; font-weight: 700; font-size: 0.9rem; color: #fff; }
+        .sb-image { width: 100%; aspect-ratio: 2000 / 1600; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; overflow: hidden; }
+        .sb-image img { width: 100%; height: 100%; object-fit: cover; }
+        .sb-footer { padding: 12px 15px; text-align: center; font-size: 0.85rem; font-weight: 500; color: #e2e8f0; border-top: 1px solid rgba(255,255,255,0.05); background: rgba(0,0,0,0.2); border-radius: 0 0 16px 16px; min-height: 45px; display: flex; align-items: center; justify-content: center; }
+        .sb-arrow { position: absolute; right: -25px; top: 50%; transform: translateY(-50%); font-size: 2rem; z-index: 5; }
+        .theme-purple .sb-arrow { color: #a78bfa; text-shadow: 0 0 10px #7c3aed; } .theme-blue .sb-arrow { color: #93c5fd; text-shadow: 0 0 10px #2563eb; } .theme-yellow .sb-arrow { color: #fde68a; text-shadow: 0 0 10px #f59e0b; }
+
+        /* === 8. STORY MAPPING === */
+        .mapping-container { width: 100%; overflow-x: auto; margin-bottom: 5rem; }
+        .mapping-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 15px; overflow: hidden; border: 1px solid var(--card-border); }
+        .mapping-table th, .mapping-table td { padding: 1.5rem; text-align: center; border: 1px solid rgba(255,255,255,0.1); }
+        .mapping-table th { background: rgba(34, 211, 238, 0.1); color: var(--cyan-accent); font-family: 'Montserrat'; text-transform: uppercase; }
+        .col-main { font-weight: 900; color: #fff; background: rgba(255,255,255,0.05); }
+        .mvp-cell { background: rgba(52, 211, 153, 0.1); border-left: 4px solid var(--green-accent); font-weight: 700; color: var(--green-accent); }
+        .figma-wrapper { 
+            width: 100%; 
+            max-width: 1200px; 
+            margin: 0 auto 5rem; 
+            background: rgba(10, 15, 35, 0.4); 
+            border: 1px solid var(--cyan-accent); 
+            border-radius: 24px; 
+            padding: 1.5rem; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(34, 211, 238, 0.05); 
+            display: flex; 
+            flex-direction: column;
+            align-items: center;
+        }
+        .figma-iframe { 
+            width: 100%; 
+            height: 700px; 
+            border-radius: 12px; 
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #1e1e1e; 
+        }
+
+        /* === BARKOD TARAYICI SİMÜLATÖRÜ STİLLERİ === */
+        .scanner-wrapper {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            margin-bottom: 5rem;
+        }
+        .scanner-canvas-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            height: 420px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .scanner-title {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 0.8rem;
+            color: var(--cyan-accent);
+            font-family: 'Montserrat';
+            font-weight: 700;
+            z-index: 10;
+        }
+        .scan-button-container {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            z-index: 10;
+            padding: 0 15px;
+        }
+        .scanner-btn {
+            background: rgba(13, 22, 53, 0.9);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .scanner-btn:hover {
+            border-color: var(--cyan-accent);
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+            transform: translateY(-2px);
+        }
+        .laser-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 0, 0, 0.8);
+            box-shadow: 0 0 15px 4px rgba(255, 0, 0, 0.8);
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @@keyframes laser-sweep {
+            0% { top: 10%; opacity: 1; }
+            50% { top: 80%; opacity: 1; }
+            100% { top: 10%; opacity: 1; }
+        }
+
+        .laser-active {
+            animation: laser-sweep 2s infinite ease-in-out;
+        }
+
+        .scanner-hud-panel {
+            background: rgba(5, 9, 20, 0.85);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 420px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .hud-header {
+            font-size: 0.8rem;
+            color: var(--cyan-accent);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 0.5rem;
+            letter-spacing: 1px;
+            font-weight: 700;
+        }
+        .hud-terminal {
+            flex-grow: 1;
+            margin: 1rem 0;
+            overflow-y: auto;
+            font-size: 0.78rem;
+            line-height: 1.6;
+            color: #a7f3d0;
+            padding-right: 5px;
+        }
+        .hud-line {
+            margin-bottom: 6px;
+            word-break: break-all;
+        }
+        .hud-line.muted { color: var(--text-muted); }
+        .hud-line.warning { color: var(--yellow-accent); }
+        .hud-line.error { color: #ff4b4b; font-weight: 700; text-shadow: 0 0 5px rgba(255, 75, 75, 0.3); }
+        .hud-line.success { color: var(--green-accent); font-weight: 700; }
+        .hud-status-box {
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+        }
+        .hud-status-box.info { background: rgba(58, 123, 213, 0.2); color: var(--cyan-accent); border: 1px solid var(--blue-accent); }
+        .hud-status-box.success { background: rgba(52, 211, 153, 0.15); color: var(--green-accent); border: 1px solid var(--green-accent); box-shadow: 0 0 15px rgba(52, 211, 153, 0.2); }
+        .hud-status-box.warning { background: rgba(245, 158, 11, 0.15); color: var(--yellow-accent); border: 1px solid var(--yellow-accent); }
+        .hud-status-box.error { background: rgba(239, 68, 68, 0.2); color: #ff4b4b; border: 1px solid #ff4b4b; box-shadow: 0 0 20px rgba(239, 68, 68, 0.3); animation: flashRed 1s infinite alternate; }
+
+        @@keyframes flashRed {
+            from { opacity: 1; }
+            to { opacity: 0.6; }
+        }
+
+        @@media (max-width: 1024px) {
+            .scanner-wrapper {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* === LENIS SMOOTH SCROLL STİLLERİ === */
+        html.lenis, html.lenis body {
+            height: auto;
+        }
+        .lenis.lenis-smooth {
+            scroll-behavior: auto !important;
+        }
+        .lenis.lenis-smooth [data-lenis-prevent] {
+            overscroll-behavior: contain;
+        }
+        .lenis.lenis-stopped {
+            overflow: hidden;
+        }
+        .lenis.lenis-scrolling iframe {
+            pointer-events: none;
+        }
+
+        /* === KANO MODELİ SİMÜLATÖRÜ STİLLERİ === */
+        .kano-wrapper {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            margin-bottom: 5rem;
+        }
+        .kano-canvas-container {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            height: 440px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .kano-title {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 0.8rem;
+            color: var(--cyan-accent);
+            font-family: 'Montserrat';
+            font-weight: 700;
+            z-index: 10;
+        }
+        .kano-hud-panel {
+            background: rgba(5, 9, 20, 0.85);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 440px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
+            font-family: 'Poppins', sans-serif;
+        }
+        .kano-req-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 0.8rem;
+        }
+        .kano-tab-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-muted);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+            cursor: pointer;
+            font-family: 'Montserrat';
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        .kano-tab-btn:hover, .kano-tab-btn.active {
+            color: #fff;
+            background: rgba(34, 211, 238, 0.15);
+            border-color: var(--cyan-accent);
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+        }
+        .kano-tab-btn.must-be-btn.active { background: rgba(239, 68, 68, 0.15); border-color: var(--red-accent); color: var(--red-accent); }
+        .kano-tab-btn.perf-btn.active { background: rgba(34, 211, 238, 0.15); border-color: var(--cyan-accent); color: var(--cyan-accent); }
+        .kano-tab-btn.delight-btn.active { background: rgba(52, 211, 153, 0.15); border-color: var(--green-accent); color: var(--green-accent); }
+        
+        .kano-details-card {
+            flex-grow: 1;
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 1.2rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            overflow-y: auto;
+            max-height: 250px;
+        }
+        .kano-details-header {
+            font-family: 'Montserrat';
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .kano-details-category {
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+        .kano-details-desc {
+            font-size: 0.8rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+        }
+        .kano-axis-label {
+            position: absolute;
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            font-family: 'Montserrat';
+            z-index: 10;
+        }
+
+        @@media (max-width: 1024px) {
+            .kano-wrapper {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+
+        /* === VİZE BULGULARI VE KONSEPT STİLLERİ === */
+        .vize-grid {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 2rem;
+            width: 100%;
+            margin-bottom: 3rem;
+        }
+        .vize-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        .vize-item {
+            background: rgba(239, 68, 68, 0.08);
+            border-left: 4px solid var(--red-accent);
+            border-radius: 8px;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+        .vize-item:hover {
+            transform: translateX(5px);
+            background: rgba(239, 68, 68, 0.12);
+            box-shadow: 0 4px 20px rgba(239, 68, 68, 0.15);
+        }
+        .vize-icon {
+            font-size: 1.5rem;
+            color: var(--red-accent);
+        }
+        .vize-text {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #e2e8f0;
+        }
+        .result-need-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            justify-content: center;
+        }
+        .flow-card {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .flow-card.result {
+            border-left: 4px solid var(--orange-accent);
+        }
+        .flow-card.need {
+            border-left: 4px solid var(--cyan-accent);
+        }
+        .flow-card-title {
+            font-family: 'Montserrat';
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 0.5rem;
+            letter-spacing: 1px;
+        }
+        .flow-card.result .flow-card-title { color: var(--orange-accent); }
+        .flow-card.need .flow-card-title { color: var(--cyan-accent); }
+        .flow-card-body {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: #fff;
+            line-height: 1.5;
+        }
+        .flow-arrow {
+            text-align: center;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+            margin: -0.5rem 0;
+            animation: pulse-down 1.5s infinite ease-in-out;
+        }
+        @@keyframes pulse-down {
+            0%, 100% { transform: translateY(0); opacity: 0.5; }
+            50% { transform: translateY(5px); opacity: 1; }
+        }
+        .vize-footer-callout {
+            width: 100%;
+            background: linear-gradient(135deg, rgba(13, 22, 53, 0.8), rgba(58, 123, 213, 0.15));
+            border: 1px solid var(--cyan-accent);
+            border-radius: 15px;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 700;
+            line-height: 1.6;
+            color: #fff;
+            box-shadow: 0 0 25px rgba(34, 211, 238, 0.15);
+            margin-bottom: 4rem;
+        }
+
+        /* === ÇÖZÜM KONSEPTİ STİLLERİ === */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr 1fr;
+            gap: 1.5rem;
+            width: 100%;
+            margin-bottom: 4rem;
+        }
+        .concept-column {
+            background: var(--card-bg);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .concept-col-header {
+            font-family: 'Montserrat';
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .concept-column.focus { border-top: 4px solid var(--orange-accent); }
+        .concept-column.focus .concept-col-header { color: var(--orange-accent); }
+        .concept-column.logic { border-top: 4px solid var(--green-accent); }
+        .concept-column.logic .concept-col-header { color: var(--green-accent); }
+        .concept-column.market { border-top: 4px solid var(--cyan-accent); }
+        .concept-column.market .concept-col-header { color: var(--cyan-accent); }
+
+        .concept-body {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            height: 100%;
+        }
+        .concept-tag {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--orange-accent);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            display: inline-block;
+            margin-bottom: 5px;
+        }
+        .concept-item-box {
+            background: rgba(0, 0, 0, 0.25);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 10px;
+        }
+        .concept-item-box h4 {
+            color: #fff;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .logic-step-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .logic-step {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255,255,255,0.03);
+            border-radius: 8px;
+            padding: 0.75rem;
+            position: relative;
+        }
+        .logic-step-num {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--green-accent);
+            color: var(--bg-deep);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-family: 'Montserrat';
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
+        }
+        .logic-step-text {
+            font-size: 0.85rem;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+        .logic-step-text strong {
+            color: #fff;
+        }
+        .logic-step-arrow {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--green-accent);
+            opacity: 0.7;
+            margin: 2px 0;
+        }
+        
+        .market-option-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+        .market-option-card:hover {
+            border-color: var(--cyan-accent);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(34, 211, 238, 0.1);
+        }
+        .market-option-badge {
+            background: rgba(34, 211, 238, 0.1);
+            color: var(--cyan-accent);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            align-self: flex-start;
+            text-transform: uppercase;
+        }
+        .market-option-title {
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        @@media (max-width: 1024px) {
+            .vize-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .concept-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="particles-canvas"></canvas>
+
+    <div class="content-wrapper">
+        
+        <div class="header">
+            <!-- 3D Header Kübü -->
+            <div id="canvas-3d-header" style="width:180px; height:180px; margin: 0 auto 1.5rem;"></div>
+            <h1>LUNA PROJESİ<br><span class="gold-text">ÇÖZÜM MİMARİSİ KATALOĞU</span></h1>
+        </div>
+
+        <!-- ARA PROJE BULGULARINDAN ÇÖZÜM MİMARİSİNE BÖLÜMÜ -->
+        <div class="section-title">ARA PROJE BULGULARINDAN ÇÖZÜM MİMARİSİNE (VİZE ÖZETİ)</div>
+        <div class="vize-grid">
+            <!-- Sol Sütun: Tespit Ettiklerimiz -->
+            <div class="vize-list">
+                <div style="font-family:'Montserrat'; font-size:1.1rem; font-weight:800; color:var(--red-accent); margin-bottom:0.5rem; display:flex; align-items:center; gap:8px;">
+                    <i class="bi bi-exclamation-octagon-fill"></i> TESPİT ETTİKLERİMİZ
+                </div>
+                <div class="vize-item">
+                    <i class="bi bi-chat-left-text-fill vize-icon"></i>
+                    <span class="vize-text">SKT şikayetleri görünür durumda</span>
+                </div>
+                <div class="vize-item">
+                    <i class="bi bi-shield-fill-exclamation vize-icon"></i>
+                    <span class="vize-text">Kritik ürünlerde kalite riski mevcut</span>
+                </div>
+                <div class="vize-item">
+                    <i class="bi bi-person-fill-exclamation vize-icon"></i>
+                    <span class="vize-text">Süreç tamamen çalışan dikkatine bağımlı</span>
+                </div>
+                <div class="vize-item">
+                    <i class="bi bi-calendar-x-fill vize-icon"></i>
+                    <span class="vize-text">Yakın tarihli ürünler etkin yönetilemiyor</span>
+                </div>
+                <div class="vize-item">
+                    <i class="bi bi-trash3-fill vize-icon"></i>
+                    <span class="vize-text">Yüksek miktarda gıda israfı oluşuyor</span>
+                </div>
+            </div>
+
+            <!-- Sağ Sütun: Sonuç ve İhtiyaç -->
+            <div class="result-need-container">
+                <div class="flow-card result">
+                    <div class="flow-card-title"><i class="bi bi-arrow-right-circle-fill"></i> SONUÇ</div>
+                    <div class="flow-card-body">Mevcut süreç reaktif çalışıyor. (Hata oluştuktan sonra müdahale ediliyor)</div>
+                </div>
+                
+                <div class="flow-arrow"><i class="bi bi-chevron-double-down"></i></div>
+                
+                <div class="flow-card need">
+                    <div class="flow-card-title"><i class="bi bi-lightning-charge-fill"></i> İHTİYAÇ</div>
+                    <div class="flow-card-body">SKT bilgisini süreç boyunca görünür kılan, otomatik karar verebilen bir sistem.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vize Geçiş Vurgusu -->
+        <div class="vize-footer-callout">
+            <i class="bi bi-info-circle-fill" style="color: var(--cyan-accent); font-size: 1.2rem; margin-right: 8px;"></i>
+            Bu nedenle final projesinde SKT kontrolünü manuel yapıdan çıkararak sistem destekli hale getiren <span style="background: var(--gold-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight:900;">Akıllı SKT Yönetim Sistemini (LUNA)</span> tasarladık.
+        </div>
+
+        <!-- TASARLANAN ÇÖZÜM BÖLÜMÜ -->
+        <div class="section-title">TASARLANAN ÇÖZÜM (ÇÖZÜM KONSEPTİ ÖZETİ)</div>
+        <div class="concept-grid">
+            <!-- 1. Sütun: Odak Kategori -->
+            <div class="concept-column focus">
+                <div class="concept-col-header">
+                    <i class="bi bi-tags-fill"></i>
+                    <span>Faz 1: Odak Kategori</span>
+                </div>
+                <div class="concept-body">
+                    <div class="concept-item-box">
+                        <span class="concept-tag">Hedef Grup</span>
+                        <h4>Et ve Tavuk Ürünleri</h4>
+                        <p style="margin-top: 5px;">Sağlık riski ve fire oranlarının en yüksek olduğu kritik ürün grubu.</p>
+                    </div>
+                    <div class="concept-item-box">
+                        <span class="concept-tag" style="background:rgba(239, 68, 68, 0.15); color:var(--red-accent);">Uygulanabilirlik</span>
+                        <h4>Neden Bu Kategori?</h4>
+                        <ul style="padding-left: 1.2rem; margin-top: 5px;">
+                            <li>Yüksek gıda güvenliği ve kalite riski taşımaları</li>
+                            <li>Halihazırda dinamik barkod altyapısını kullanıyor olmaları</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Sütun: Sistem Mantığı -->
+            <div class="concept-column logic">
+                <div class="concept-col-header">
+                    <i class="bi bi-cpu-fill"></i>
+                    <span>Sistem Mantığı</span>
+                </div>
+                <div class="logic-step-list">
+                    <div class="logic-step">
+                        <div class="logic-step-num">1</div>
+                        <div class="logic-step-text">Ürün kasap reyonunda <strong>paketleniyor</strong></div>
+                    </div>
+                    <div class="logic-step-arrow"><i class="bi bi-chevron-down"></i></div>
+                    <div class="logic-step-wrap">
+                        <div class="logic-step">
+                            <div class="logic-step-num">2</div>
+                            <div class="logic-step-text">SKT bilgileri dinamik barkodla <strong>sisteme aktarılıyor</strong></div>
+                        </div>
+                    </div>
+                    <div class="logic-step-arrow"><i class="bi bi-chevron-down"></i></div>
+                    <div class="logic-step-wrap">
+                        <div class="logic-step">
+                            <div class="logic-step-num">3</div>
+                            <div class="logic-step-text">Her gün otomatik olarak <strong>sistem üzerinden kontrol</strong> ediliyor</div>
+                        </div>
+                    </div>
+                    <div class="logic-step-arrow"><i class="bi bi-chevron-down"></i></div>
+                    <div class="logic-step-wrap">
+                        <div class="logic-step" style="border-color: var(--yellow-accent);">
+                            <div class="logic-step-num" style="background:var(--yellow-accent);">4</div>
+                            <div class="logic-step-text">SKT'ye <strong>3 gün kala</strong> otomatik <strong>%20 indirim</strong> tanımlanıyor</div>
+                        </div>
+                    </div>
+                    <div class="logic-step-arrow"><i class="bi bi-chevron-down"></i></div>
+                    <div class="logic-step-wrap">
+                        <div class="logic-step" style="border-color: var(--red-accent);">
+                            <div class="logic-step-num" style="background:var(--red-accent); color:#fff;">5</div>
+                            <div class="logic-step-text">SKT geçerse kasada <strong>satış blokajı</strong> uygulanıyor</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. Sütun: Sanal Market -->
+            <div class="concept-column market">
+                <div class="concept-col-header">
+                    <i class="bi bi-cart4"></i>
+                    <span>Sanal Market Seçenekleri</span>
+                </div>
+                <div class="concept-body" style="justify-content: space-around;">
+                    <div class="market-option-card">
+                        <span class="market-option-badge">Standart Güvence</span>
+                        <div class="market-option-title">5 Gün SKT Garantili Ürün</div>
+                        <p style="font-size:0.78rem; color:#a0b0d0; margin-top:5px;">Müşteriye tam tazelik garantisiyle sunulan standart ürün seçeneği.</p>
+                    </div>
+                    
+                    <div style="text-align: center; color: var(--text-muted); font-size: 0.8rem; font-weight: 700;">VEYA</div>
+                    
+                    <div class="market-option-card" style="border-color: var(--cyan-accent); background: rgba(34, 211, 238, 0.05);">
+                        <span class="market-option-badge" style="background:rgba(34, 211, 238, 0.2);">İndirim Fırsatı</span>
+                        <div class="market-option-title" style="color: var(--cyan-accent);">Yakın Tarih Fırsatı (%20 İndirim)</div>
+                        <p style="font-size:0.78rem; color:#cbd5e1; margin-top:5px;">SKT'ye 1-3 gün kalmış ürünleri indirimli alarak gıda israfını önleme seçeneği.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">1. 3M Analizi (Muda, Mura, Muri)</div>
+        <div class="grid-2">
+            <div class="analysis-card muda">
+                <div class="card-header"><h3>🔴 İSRAF 1: Kusurlar</h3><span class="card-badge badge-red">En Kritik</span></div>
+                <p><strong>Neden İsraf?</strong> SKT'si geçmiş ürün "hatalı çıktı"dır. Sağlık riski, tazminat maliyeti ve marka güvenini zedeleyen en yıkıcı israf türüdür.</p>
+                <p><strong>Veri:</strong> Şikayetlerin %22,7'si SKT kaynaklıdır.</p>
+            </div>
+            <div class="analysis-card muda">
+                <div class="card-header"><h3>🔴 İSRAF 2: Fazla İşlem</h3><span class="card-badge badge-red">Verimsizlik</span></div>
+                <p><strong>Neden İsraf?</strong> Ürünün SKT'si rafa yerleştirmede ve periyodik kontrolde tekrar tekrar gözle kontrol ediliyor ancak hiçbir noktada dijital kayıt tutulmuyor.</p>
+            </div>
+            <div class="analysis-card muda">
+                <div class="card-header"><h3>🔴 İSRAF 3: Gereksiz Hareket</h3><span class="card-badge badge-red">Efor Kaybı</span></div>
+                <p><strong>Neden İsraf?</strong> Personelin değer katmayan fiziksel hareketi (reyonlar arası yürümek, eğilmek, ürünleri çevirip tarih aramak).</p>
+            </div>
+            <div class="analysis-card muda">
+                <div class="card-header"><h3>🔴 İSRAF 4: Stok</h3><span class="card-badge badge-red">Ölü Yatırım</span></div>
+                <p><strong>Neden İsraf?</strong> Süresi dolmuş ürün satılması yasak olan bir stoktur. Proaktif tespit olmadığı için imha fire maliyeti yaratır.</p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="analysis-card mura">
+                <div class="card-header"><h3 style="color:var(--yellow-accent);">🟡 MURA (DÜZENSİZLİK)</h3></div>
+                <p>Sürecin tutarsız uygulanması:</p>
+                <ul>
+                    <li><strong>Mağazalar Arası Fark:</strong> Bir mağazada günde 3 tur yapılırken diğerinde 1 tur yapılması.</li>
+                    <li><strong>Vardiya Farkı:</strong> Akşam saatlerinde kontrol kalitesinin düşmesi.</li>
+                    <li><strong>Personel Farkı:</strong> Geçici personel ile deneyimli personel arası farkındalık uçurumu.</li>
+                </ul>
+            </div>
+            <div class="analysis-card muri">
+                <div class="card-header"><h3 style="color:var(--orange-accent);">🟠 MURİ (AŞIRI YÜK)</h3></div>
+                <p>Sistemin yarattığı zihinsel yük:</p>
+                <ul>
+                    <li><strong>Raf Personeli:</strong> Binlerce ürünün SKT'sini insan hafızasıyla yönetme beklentisi.</li>
+                    <li><strong>Kasiyer:</strong> Barkod tarama, ödeme alma ve SKT kontrolünü aynı anda yapma beklentisi.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section-title">2. EBO (ELIMINATE, SIMPLIFY, OPTIMIZE)</div>
+        <div class="ebo-container">
+            <table class="data-table table-eliminate">
+                <thead><tr><th>#</th><th>ELIMINATE (Ortadan Kaldır)</th><th>Gerekçe</th><th>Yerine Gelen (LUNA)</th></tr></thead>
+                <tbody>
+                    <tr><td>E1</td><td>Manuel göz ile periyodik kontrol</td><td>İnsan hatasına açık, ölçeklenemez.</td><td>Dijital SKT veritabanı.</td></tr>
+                    <tr><td>E2</td><td>Bozuk ürünün kasadan geçme ihtimali</td><td>Müşteriye kusurlu ürün ulaştıran boşluk.</td><td>POS seviyesinde bloke mekanizması.</td></tr>
+                    <tr><td>E3</td><td>Kağıt bazlı kontrol formları</td><td>Veri analizi yapılamaz.</td><td>Dijital dashboard.</td></tr>
+                </tbody>
+            </table>
+
+            <table class="data-table table-simplify">
+                <thead><tr><th>#</th><th>SIMPLIFY (Sadeleştir / Birleştir)</th><th>Önceki Durum</th><th>Yeni Durum (LUNA)</th></tr></thead>
+                <tbody>
+                    <tr><td>B1</td><td>SKT Kontrol Noktaları</td><td>Depo, raf, toplama, kasa (4-5 ayrı adım).</td><td>Mal kabulde tek kayıt + otomatik takip.</td></tr>
+                    <tr><td>B2</td><td>Müşteri Bilgilendirmesi</td><td>Hiçbir bilgilendirme yok.</td><td>Fiş + SMS + App tek motor.</td></tr>
+                    <tr><td>B3</td><td>FIFO Uygulaması</td><td>Personelin elle önce/arkaya dizmesi.</td><td>Sistemin FIFO sırasını görevliye iletmesi.</td></tr>
+                </tbody>
+            </table>
+
+            <table class="data-table table-optimize">
+                <thead><tr><th>#</th><th>OPTIMIZE (İyileştir / Değer Yarat)</th><th>Açıklama</th><th>Beklenen Fayda</th></tr></thead>
+                <tbody>
+                    <tr><td>O1</td><td>Dinamik Fiyatlama</td><td>SKT'ye 1-2 gün kalan ürünlere %20 indirim.</td><td>Fire düşüşü + Fırsat algısı.</td></tr>
+                    <tr><td>O2</td><td>Sanal Market Seçeneği</td><td>Müşteriye "Taze" veya "İndirimli Yakın SKT" seçimi.</td><td>Tercih hakkı + İsrafı azaltma.</td></tr>
+                    <tr><td>O3</td><td>Kategori Bazlı Risk</td><td>Et/Tavuk (Yüksek Risk), Konserve (Düşük Risk) ayırımı.</td><td>Kaynakların doğru yönlendirilmesi.</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-title">2.1. BPMN 2.0 SÜREÇ DİYAGRAMLARI</div>
+
+        <!-- YENİ/ESKİ SÜREÇ İNTERAKTİF GÖSTERİCİ -->
+        <style>
+            /* 3D Hologram Geçiş Stilleri */
+            .bpmn-container-3d {
+                transition: transform 0.8s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.8s cubic-bezier(0.25, 1, 0.5, 1), filter 0.8s ease, box-shadow 0.8s ease;
+                transform-style: preserve-3d;
+                transform: perspective(1500px) translateZ(0) rotateX(0) rotateY(0);
+                will-change: transform, opacity, filter;
+            }
+
+            .bpmn-container-3d.hologram-out {
+                transform: perspective(1500px) translateZ(-400px) rotateX(20deg) rotateY(-15deg);
+                opacity: 0.15;
+                filter: blur(3px) brightness(1.8) drop-shadow(0 0 30px var(--cyan-accent));
+                box-shadow: 0 0 50px rgba(34, 211, 238, 0.4);
+            }
+        </style>
+
+        <div style="display: grid; grid-template-columns: 350px 1fr; gap: 1.5rem; width: 100%; margin-bottom: 3rem; align-items: stretch; perspective: 1500px;">
+            
+            <!-- Sol Panel: Açıklama ve Seçici Kartı -->
+            <div class="analysis-card" id="bpmn-sidebar" style="border-left: 4px solid var(--green-accent); transition: border-color 0.3s ease; height: 100%; display: flex; flex-direction: column;">
+                
+                <!-- Seçici Butonlar -->
+                <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; width: 100%;">
+                    <button id="btn-to-be" onclick="switchProcess('to-be')" style="flex: 1; padding: 0.75rem 0.5rem; border-radius: 8px; border: 1px solid var(--green-accent); background: rgba(52,211,153,0.15); color: var(--green-accent); font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 0.8rem; font-family: 'Poppins', sans-serif;">
+                        🚀 YENİ SÜREÇ (TO-BE)
+                    </button>
+                    <button id="btn-as-is" onclick="switchProcess('as-is')" style="flex: 1; padding: 0.75rem 0.5rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: var(--text-muted); font-weight: bold; cursor: pointer; transition: all 0.3s ease; font-size: 0.8rem; font-family: 'Poppins', sans-serif;">
+                        📋 ESKİ SÜREÇ (AS-IS)
+                    </button>
+                </div>
+
+                <!-- Yeni Süreç Açıklaması -->
+                <div id="desc-to-be" style="display: flex; flex-direction: column; gap: 12px; flex: 1;">
+                    <div class="card-header">
+                        <h3 style="color:var(--green-accent);">🚀 TO-BE (FİNAL)</h3>
+                        <span class="card-badge" style="background:rgba(52,211,153,0.15); color:var(--green-accent);">Yeni Süreç</span>
+                    </div>
+                    <p><strong>LUNA Entegreli M-SKT Süreci</strong></p>
+                    <p>Barkod tarama → SKT Doğrulama → Otomatik Karar → Bildirim akışını gösteren TO-BE süreç modeli.</p>
+                    <ul style="padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px;">
+                        <li><strong>Havuzlar:</strong> Depo, Mağaza, Müşteri, Sistem</li>
+                        <li><strong>Yenilik:</strong> Otomatik SKT takibi, indirim, blokaj ve Money App bildirimi</li>
+                        <li><strong>Gateway:</strong> SKT Kaç Gün? + Money Üyelik Kontrolü</li>
+                    </ul>
+                    <p style="font-size:0.75rem; color:var(--green-accent); margin-top:auto; font-weight:700;"><i class="bi bi-check-circle-fill"></i> Final Projesi - Geliştirilmiş Süreç</p>
+                </div>
+
+                <!-- Eski Süreç Açıklaması -->
+                <div id="desc-as-is" style="display: none; flex-direction: column; gap: 12px; flex: 1;">
+                    <div class="card-header">
+                        <h3 style="color:var(--red-accent);">📋 AS-IS (VİZE)</h3>
+                        <span class="card-badge badge-red">Mevcut Süreç</span>
+                    </div>
+                    <p><strong>Manuel SKT Kontrol Süreci</strong></p>
+                    <p>LUNA sistemi öncesi mevcut iş akışı — tamamen manuel kontrol ve insan hatasına açık süreç modeli.</p>
+                    <ul style="padding-left: 1.2rem; display: flex; flex-direction: column; gap: 6px;">
+                        <li><strong>Problem:</strong> SKT kontrolü tamamen göze dayalı</li>
+                        <li><strong>Risk:</strong> Tarihi geçmiş ürün satışı engellenmez</li>
+                        <li><strong>İsraf:</strong> Bozulan ürünler %100 fire olur</li>
+                    </ul>
+                    <p style="font-size:0.75rem; color:var(--red-accent); margin-top:auto; font-weight:700;"><i class="bi bi-exclamation-triangle-fill"></i> Vize Projesi - Mevcut Durum</p>
+                </div>
+            </div>
+
+            <!-- Sağ Panel: İnteraktif Çerçeve (Diyagram Alanı) -->
+            <div id="bpmn-container" class="bpmn-container-3d" style="background: #ffffff; border-radius: 15px; border: 1px solid var(--card-border); overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; height: 650px; position: relative;">
+                
+                <!-- Kontrol Barı -->
+                <div style="background: #111827; padding: 0.75rem 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center; color: #fff; z-index: 2;">
+                    <div style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem;">
+                        <i class="bi bi-diagram-3-fill" style="color: var(--cyan-accent);"></i>
+                        <span style="font-weight: 600;" id="viewer-title">LUNA M-SKT Yeni Süreç (TO-BE)</span>
+                    </div>
+                    <div style="font-size: 0.75rem; color: #9ca3af; display: flex; align-items: center; gap: 0.25rem;">
+                        <i class="bi bi-info-circle"></i> Sürükleyerek kaydırın, fare tekerleğiyle yakınlaştırın
+                    </div>
+                </div>
+
+                <!-- Çerçevenin İçi (Iframe) -->
+                <div style="flex: 1; position: relative; background: #ffffff; z-index: 1;">
+                    <iframe id="bpmn-iframe" style="width: 100%; height: 100%; border: none; background: #ffffff;" src="https://viewer.diagrams.net/?embed=1&proto=json&spin=1"></iframe>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            (function() {
+                var bpmnXmlCache = {
+                    'to-be': null,
+                    'as-is': null
+                };
+
+                var currentBPMN = 'to-be';
+                var iframeReady = false;
+
+                function getDiagramXml(text) {
+                    try {
+                        var parser = new DOMParser();
+                        var doc = parser.parseFromString(text, "image/svg+xml");
+                        var content = doc.documentElement.getAttribute("content");
+                        if (content) {
+                            return content;
+                        }
+                    } catch(e) {}
+                    return text;
+                }
+
+                // Dosyaları çekelim
+                fetch('/photos/to-be-bpmn2.0-final.svg')
+                    .then(function(r) { return r.text(); })
+                    .then(function(text) {
+                        bpmnXmlCache['to-be'] = getDiagramXml(text);
+                        if (currentBPMN === 'to-be' && iframeReady) {
+                            loadDiagramInIframe(bpmnXmlCache['to-be']);
+                        }
+                    });
+
+                fetch('/photos/vizebpmnguncel.svg')
+                    .then(function(r) { return r.text(); })
+                    .then(function(text) {
+                        bpmnXmlCache['as-is'] = getDiagramXml(text);
+                        if (currentBPMN === 'as-is' && iframeReady) {
+                            loadDiagramInIframe(bpmnXmlCache['as-is']);
+                        }
+                    });
+
+                window.addEventListener('message', function(evt) {
+                    if (evt.data && evt.data.length > 0) {
+                        try {
+                            var msg = JSON.parse(evt.data);
+                            if (msg.event === 'init') {
+                                iframeReady = true;
+                                var xml = bpmnXmlCache[currentBPMN];
+                                if (xml) {
+                                    loadDiagramInIframe(xml);
+                                }
+                            }
+                        } catch(e) {}
+                    }
+                });
+
+                function loadDiagramInIframe(xml) {
+                    var iframe = document.getElementById('bpmn-iframe');
+                    if (iframe && iframe.contentWindow) {
+                        iframe.contentWindow.postMessage(JSON.stringify({
+                            action: 'load',
+                            xml: xml,
+                            autosave: false
+                        }), '*');
+                    }
+                }
+
+                window.switchProcess = function(type) {
+                    if (currentBPMN === type) return;
+                    currentBPMN = type;
+
+                    var btnToBe = document.getElementById('btn-to-be');
+                    var btnAsIs = document.getElementById('btn-as-is');
+                    var sidebar = document.getElementById('bpmn-sidebar');
+                    var descToBe = document.getElementById('desc-to-be');
+                    var descAsIs = document.getElementById('desc-as-is');
+                    var title = document.getElementById('viewer-title');
+                    var container = document.getElementById('bpmn-container');
+
+                    // 1. Hologram Out animasyonunu başlat
+                    container.classList.add('hologram-out');
+
+                    // 2. 300ms sonra (tam geri çekildiği an) içerikleri ve renkleri değiştir
+                    setTimeout(function() {
+                        if (type === 'to-be') {
+                            btnToBe.style.background = 'rgba(52,211,153,0.15)';
+                            btnToBe.style.color = 'var(--green-accent)';
+                            btnToBe.style.borderColor = 'var(--green-accent)';
+                            
+                            btnAsIs.style.background = 'rgba(255,255,255,0.05)';
+                            btnAsIs.style.color = 'var(--text-muted)';
+                            btnAsIs.style.borderColor = 'rgba(255,255,255,0.1)';
+
+                            sidebar.style.borderLeftColor = 'var(--green-accent)';
+                            descToBe.style.display = 'flex';
+                            descAsIs.style.display = 'none';
+                            title.innerHTML = 'LUNA M-SKT Yeni Süreç (TO-BE)';
+                        } else {
+                            btnAsIs.style.background = 'rgba(239,68,68,0.15)';
+                            btnAsIs.style.color = 'var(--red-accent)';
+                            btnAsIs.style.borderColor = 'var(--red-accent)';
+                            
+                            btnToBe.style.background = 'rgba(255,255,255,0.05)';
+                            btnToBe.style.color = 'var(--text-muted)';
+                            btnToBe.style.borderColor = 'rgba(255,255,255,0.1)';
+
+                            sidebar.style.borderLeftColor = 'var(--red-accent)';
+                            descToBe.style.display = 'none';
+                            descAsIs.style.display = 'flex';
+                            title.innerHTML = 'M-SKT Eski Süreç (AS-IS)';
+                        }
+
+                        var xml = bpmnXmlCache[type];
+                        if (xml && iframeReady) {
+                            loadDiagramInIframe(xml);
+                        }
+                    }, 300);
+
+                    // 3. 450ms sonra tekrar öne getir (Hologram In)
+                    setTimeout(function() {
+                        container.classList.remove('hologram-out');
+                    }, 450);
+                }
+            })();
+        </script>
+
+        <div class="section-title">3. PAYDAŞ YÖNETİMİ (GÜÇ/İLGI VE RACI)</div>
+        <div style="display: flex; flex-direction: column; gap: 2rem; width: 100%;">
+            
+            <div class="matrix-grid">
+                <div class="matrix-cell">
+                    <h4><span>YÜKSEK GÜÇ</span> <span style="color:var(--cyan-accent)">YÜKSEK İLGİ</span></h4>
+                    <ul><li>Mağaza Yöneticisi</li><li>IT / ERP Ekibi</li><li>Gıda Güvenliği / Kalite</li></ul>
+                </div>
+                <div class="matrix-cell">
+                    <h4><span>YÜKSEK GÜÇ</span> <span style="color:var(--text-muted)">DÜŞÜK İLGİ</span></h4>
+                    <ul><li>Üst Yönetim</li><li>Finans / Maliyet Kontrol</li></ul>
+                </div>
+                <div class="matrix-cell">
+                    <h4><span style="color:var(--text-muted)">DÜŞÜK GÜÇ</span> <span style="color:var(--cyan-accent)">YÜKSEK İLGİ</span></h4>
+                    <ul><li>Kasiyer</li><li>Reyon Personeli</li><li>Müşteri</li></ul>
+                </div>
+                <div class="matrix-cell">
+                    <h4><span style="color:var(--text-muted)">DÜŞÜK GÜÇ</span> <span style="color:var(--text-muted)">DÜŞÜK İLGİ</span></h4>
+                    <ul><li>Tüm Destek Operasyonları</li><li>Dolaylı Tedarik Zinciri</li></ul>
+                </div>
+            </div>
+
+            <!-- 3D Paydaş Etkileşim Ağı -->
+            <div id="canvas-3d-network" style="width:100%; height:320px; background:rgba(13, 22, 53, 0.4); border-radius:15px; margin-bottom:1.5rem; border:1px solid var(--card-border); overflow:hidden; position:relative;">
+                <div style="position:absolute; top:10px; left:15px; font-size:0.75rem; color:var(--cyan-accent); font-family:'Montserrat'; z-index:10; font-weight:700;">
+                    <i class="bi bi-diagram-3"></i> 3D PAYDAŞ ETKİLEŞİM AĞI (Sürükle-Çevir & Tıkla)
+                </div>
+                <div id="network-info" style="position:absolute; bottom:15px; left:15px; font-size:0.8rem; color:#fff; font-family:'Poppins'; z-index:10; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); pointer-events:none;">
+                    Bir paydaş düğümüne (küreye) tıklayarak rol detayını inceleyin.
+                </div>
+                <!-- Toast kartları için container -->
+                <div id="network-toast-container" style="position:absolute; top:40px; right:15px; display:flex; flex-direction:column; gap:8px; z-index:20; max-height:265px; overflow-y:auto; width:300px; pointer-events:none; padding-right:5px;"></div>
+            </div>
+
+            <table class="data-table raci-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:left;">LUNA İş Paketi (Süreç Adımı)</th>
+                        <th>Mğz. Müdürü</th><th>Depo/Raf</th><th>Kasiyer</th><th>IT/Sistem</th><th>Müşteri</th><th>Merkez</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Ürünlerin teslim alınması ve kontrolü</td>
+                        <td><span class="r-A">A</span></td><td><span class="r-R">R</span></td><td><span class="r-I">I</span></td><td><span class="r-C">C</span></td><td>-</td><td><span class="r-I">I</span></td></tr>
+                    <tr><td>Raf ve SKT kontrolü / indirim uygulama</td>
+                        <td><span class="r-A">A</span></td><td><span class="r-R">R</span></td><td><span class="r-I">I</span></td><td><span class="r-R">R</span></td><td><span class="r-I">I</span></td><td><span class="r-I">I</span></td></tr>
+                    <tr><td>Kasada ürün okutulması (SKT bloke)</td>
+                        <td><span class="r-A">A</span></td><td><span class="r-I">I</span></td><td><span class="r-R">R</span></td><td><span class="r-C">C</span></td><td><span class="r-I">I</span></td><td><span class="r-I">I</span></td></tr>
+                    <tr><td>Fiş düzenlenmesi (SKT bilgisi dahil)</td>
+                        <td><span class="r-A">A</span></td><td><span class="r-I">I</span></td><td><span class="r-R">R</span></td><td><span class="r-C">C</span></td><td><span class="r-I">I</span></td><td><span class="r-I">I</span></td></tr>
+                    <tr><td>Müşteri bildirim ve sadakat yönetimi</td>
+                        <td><span class="r-I">I</span></td><td>-</td><td><span class="r-I">I</span></td><td><span class="r-R">R</span></td><td><span class="r-I">I</span></td><td><span class="r-A">A</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-title">4. KULLANICI PERSONASI & İÇGÖRÜLER</div>
+        <div class="persona-wrapper">
+            <div class="prs-col border-cyan">
+                <div class="prs-badge">PERSONA 01</div>
+                <div class="prs-name">ECE</div>
+                <div class="prs-title">Bilinçli & Pratik Tüketici</div>
+                <div class="prs-quote-main">"Hem aile bütçemi korumak hem de israfı önlemek istiyorum, ama sipariş ettiğim gıdalarda sürpriz bozuk ürünlerle karşılaşmaya hiç tahammülüm yok."</div>
+                <div class="prs-info-grid">
+                    <div class="prs-info-label">YAŞ</div><div class="prs-info-val">32</div>
+                    <div class="prs-info-label">MESLEK</div><div class="prs-info-val">Banka Memuru</div>
+                </div>
+                <div class="prs-list-title">🎯 MOTİVASYONLARI</div>
+                <div class="prs-list"><ul><li><span class="check">✔</span> Taze ve sağlıklı beslenmek</li><li><span class="check">✔</span> İsrafı sıfıra indirmek</li></ul></div>
+            </div>
+            
+            <div class="prs-col border-blue">
+                <div class="emp-header"><h3>EMPATİ HARİTASI</h3><h2>ECE'NİN DÜNYASI</h2></div>
+                <div class="emp-map-container">
+                    <div class="emp-box thinks">
+                        <div class="emp-box-title">🧠 DÜŞÜNÜYOR</div>
+                        <ul><li>"Siparişimde et taze gelecek mi?"</li></ul>
+                    </div>
+                    <div class="emp-middle-row">
+                        <div class="emp-box sees">
+                            <div class="emp-box-title">👁️ GÖRÜYOR</div>
+                            <ul><li>Hafta sonu çöpe giden yiyecekler.</li></ul>
+                        </div>
+                        <div class="emp-avatar"><img src="~/photos/ayse.png" alt="Ece"></div>
+                        <div class="emp-box hears">
+                            <div class="emp-box-title">👂 DUYUYOR</div>
+                            <ul><li>Gıda israfı haberleri.</li></ul>
+                        </div>
+                    </div>
+                    <div class="emp-bottom-row">
+                        <div class="emp-box does">
+                            <div class="emp-box-title">🤚 YAPIYOR</div>
+                            <ul><li>Tarihleri tek tek kontrol ediyor.</li></ul>
+                        </div>
+                        <div class="emp-box feels">
+                            <div class="emp-box-title">❤️ HİSSEDİYOR</div>
+                            <ul><li>Bozuk ürünü atarken vicdan azabı.</li></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="prs-col border-gold">
+                <div class="hmw-header"><h3>İÇGÖRÜ ÇÖZÜMLERİ</h3><h2>"NASIL YAPABİLİRİZ?"</h2></div>
+                <div class="hmw-item"><strong>HMW 1:</strong> Ece'ye SKT konusunda nasıl tam kontrol verebiliriz? <i>(US01)</i></div>
+                <div class="hmw-item"><strong>HMW 2:</strong> Unuttuğu ürünleri bozulmadan tüketmesini nasıl sağlarız? <i>(US02)</i></div>
+                <div class="hmw-item"><strong>HMW 3:</strong> İsraf riski taşıyan ürünleri kurtarmaya nasıl teşvik ederiz? <i>(US03)</i></div>
+            </div>
+        </div>
+
+        <div class="section-title">4.1. SİSTEM GEREKSİNİMLERİ VE KANO MODELİ ANALİZİ</div>
+
+        <!-- FONKSİYONEL GEREKSİNİMLER -->
+        <div style="width:100%; margin-bottom:1rem;">
+            <div style="font-family:'Montserrat'; font-size:1.1rem; font-weight:800; color:var(--cyan-accent); margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                <i class="bi bi-gear-fill"></i> FONKSİYONEL GEREKSİNİMLER (FR)
+            </div>
+        </div>
+        <div class="grid-2" style="grid-template-columns: repeat(3, 1fr); margin-bottom:2rem;">
+            <div class="analysis-card" style="border-left: 4px solid var(--red-accent);">
+                <div class="card-header">
+                    <h3>📊 FR-01: Barkod Çözümleme</h3>
+                    <span class="card-badge badge-red">Must-Be</span>
+                </div>
+                <p><strong>Açıklama:</strong> Kasada veya Sanal Market toplama uygulamasında okutulan ürünün barkod yapısından ürün kimliği, net gramajı ve <strong>SKT verilerini</strong> otomatik olarak ayrıştırabilmelidir.</p>
+                <p style="font-size:0.75rem; color:var(--red-accent); margin-top:auto; font-weight:700;"><i class="bi bi-exclamation-triangle-fill"></i> Temel Baraj Gereksinimi</p>
+            </div>
+            <div class="analysis-card" style="border-left: 4px solid var(--cyan-accent);">
+                <div class="card-header">
+                    <h3>🛒 FR-04: Sanal Market Seçim Ekranı</h3>
+                    <span class="card-badge" style="background:rgba(34,211,238,0.15); color:var(--cyan-accent);">Performance</span>
+                </div>
+                <p><strong>Açıklama:</strong> Müşteriye kritik gıdalarda <strong>"En Az 5 Gün SKT Garantili"</strong> (standart fiyat) veya <strong>"%20 İndirimli 1-2 Gün SKT Fırsatı"</strong> seçenekleri sunulmalıdır.</p>
+                <p style="font-size:0.75rem; color:var(--cyan-accent); margin-top:auto; font-weight:700;"><i class="bi bi-graph-up"></i> Doğrusal Memnuniyet</p>
+            </div>
+            <div class="analysis-card" style="border-left: 4px solid var(--green-accent);">
+                <div class="card-header">
+                    <h3>📱 FR-06: Money App Bildirimi</h3>
+                    <span class="card-badge" style="background:rgba(52,211,153,0.15); color:var(--green-accent);">Delighter</span>
+                </div>
+                <p><strong>Açıklama:</strong> Money Kart ile taze gıda satın alan müşterilere, ürünün SKT'sine <strong>1 gün kala</strong> Money mobil uygulaması üzerinden otomatik push bildirimi veya SMS ile tüketim hatırlatması gönderilmelidir.</p>
+                <p style="font-size:0.75rem; color:var(--green-accent); margin-top:auto; font-weight:700;"><i class="bi bi-stars"></i> Çekici / "Wow" Etkisi</p>
+            </div>
+        </div>
+
+        <!-- FONKSİYONEL OLMAYAN GEREKSİNİMLER -->
+        <div style="width:100%; margin-bottom:1rem;">
+            <div style="font-family:'Montserrat'; font-size:1.1rem; font-weight:800; color:var(--yellow-accent); margin-bottom:1rem; display:flex; align-items:center; gap:8px;">
+                <i class="bi bi-shield-fill-check"></i> FONKSİYONEL OLMAYAN GEREKSİNİMLER (NFR)
+            </div>
+        </div>
+        <div class="grid-2" style="grid-template-columns: repeat(3, 1fr); margin-bottom:3rem;">
+            <div class="analysis-card" style="border-left: 4px solid var(--red-accent);">
+                <div class="card-header">
+                    <h3>⚡ NFR-01: Performans / Hız</h3>
+                    <span class="card-badge badge-red">Must-Be</span>
+                </div>
+                <p><strong>Metrik:</strong> Barkod tarama anından SKT doğrulama ve blokaj/indirim kararının ekrana yansıma süresi <strong style="color:var(--cyan-accent);">150 ms</strong> altında olmalıdır.</p>
+                <p><strong>Gerekçe:</strong> Kasa önünde kuyruk oluşmasını engellemek için hız en temel parametredir.</p>
+                <p style="font-size:0.75rem; color:var(--red-accent); margin-top:auto; font-weight:700;"><i class="bi bi-exclamation-triangle-fill"></i> En Kritik - Önerilen 1</p>
+            </div>
+            <div class="analysis-card" style="border-left: 4px solid var(--cyan-accent);">
+                <div class="card-header">
+                    <h3>🎯 NFR-07: Doğruluk / Kesinlik</h3>
+                    <span class="card-badge" style="background:rgba(34,211,238,0.15); color:var(--cyan-accent);">Performance</span>
+                </div>
+                <p><strong>Metrik:</strong> Barkod ayrıştırma, tarih karşılaştırma ve indirim hesaplama motorlarının hata payı <strong style="color:var(--cyan-accent);">99.99%</strong> doğruluk oranında olmalıdır.</p>
+                <p><strong>Gerekçe:</strong> 10.000 işlemde en fazla 1 hatalı bloke/indirim kararı verilmelidir.</p>
+                <p style="font-size:0.75rem; color:var(--cyan-accent); margin-top:auto; font-weight:700;"><i class="bi bi-graph-up"></i> Kalite Güvence</p>
+            </div>
+            <div class="analysis-card" style="border-left: 4px solid var(--red-accent);">
+                <div class="card-header">
+                    <h3>🔒 NFR-03: Güvenlik / KVKK</h3>
+                    <span class="card-badge badge-red">Must-Be</span>
+                </div>
+                <p><strong>Metrik:</strong> Money Kart entegrasyonu ve SMS/App gönderimi süreçlerinde kişisel veriler maskelenmeli ve tüm veri transferleri <strong style="color:var(--cyan-accent);">256-bit AES</strong> şifreli güvenli kanallardan aktarılmalıdır.</p>
+                <p style="font-size:0.75rem; color:var(--red-accent); margin-top:auto; font-weight:700;"><i class="bi bi-exclamation-triangle-fill"></i> Yasal Zorunluluk (KVKK)</p>
+            </div>
+        </div>
+
+        <!-- KANO MODELİ BAŞLIĞI -->
+        <div style="width:100%; margin-bottom:1.5rem;">
+            <div style="font-family:'Montserrat'; font-size:1.1rem; font-weight:800; color:#f8b500; display:flex; align-items:center; gap:8px;">
+                <i class="bi bi-diagram-3-fill"></i> KANO MODELİ ANALİZİ — Yukarıdaki Gereksinimler Grafik Üzerinde Sınıflandırılmıştır
+            </div>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Aşağıdaki 3D grafikte her bir gereksinim, Kano kategorisine göre ilgili eğri üzerine yerleştirilmiştir. Düğümlere tıklayarak detayları inceleyebilirsiniz.</p>
+        </div>
+        <div class="kano-wrapper">
+            <div class="kano-canvas-container" id="canvas-3d-kano">
+                <div class="kano-title"><i class="bi bi-graph-up-arrow"></i> 3D KANO MODELİ SİMÜLATÖRÜ (Etkileşimli)</div>
+                <div class="kano-axis-label" style="top: 15px; left: 50%; transform: translateX(-50%); color: var(--green-accent);"><i class="bi bi-chevron-up"></i> YÜKSEK MEMNUNİYET</div>
+                <div class="kano-axis-label" style="bottom: 15px; left: 50%; transform: translateX(-50%); color: #ff4b4b;">DÜŞÜK MEMNUNİYET <i class="bi bi-chevron-down"></i></div>
+                <div class="kano-axis-label" style="top: 50%; right: 15px; transform: translateY(-50%); color: var(--cyan-accent);">TAM İŞLEV <i class="bi bi-chevron-right"></i></div>
+                <div class="kano-axis-label" style="top: 50%; left: 15px; transform: translateY(-50%); color: var(--text-muted);"><i class="bi bi-chevron-left"></i> EKSİK İŞLEV</div>
+            </div>
+            <div class="kano-hud-panel" id="kano-hud">
+                <div class="hud-header"><i class="bi bi-list-task"></i> GEREKSİNİM DETAYLARI & KANO KATEGORİSİ</div>
+                <div class="kano-req-selector">
+                    <button class="kano-tab-btn must-be-btn active" id="btn-kano-FR-01" onclick="selectKanoReq('FR-01')">FR-01: Barkod</button>
+                    <button class="kano-tab-btn perf-btn" id="btn-kano-FR-04" onclick="selectKanoReq('FR-04')">FR-04: Sepet</button>
+                    <button class="kano-tab-btn delight-btn" id="btn-kano-FR-06" onclick="selectKanoReq('FR-06')">FR-06: Money App</button>
+                    <button class="kano-tab-btn must-be-btn" id="btn-kano-NFR-SPEED" onclick="selectKanoReq('NFR-SPEED')">NFR: Hız</button>
+                    <button class="kano-tab-btn perf-btn" id="btn-kano-NFR-ACC" onclick="selectKanoReq('NFR-ACC')">NFR: Kesinlik</button>
+                    <button class="kano-tab-btn must-be-btn" id="btn-kano-NFR-SEC" onclick="selectKanoReq('NFR-SEC')">NFR: Güvenlik</button>
+                </div>
+                <div class="kano-details-card" id="kano-details-content" data-lenis-prevent>
+                    <!-- Injected dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">5. KULLANICI HİKAYELERİ (USER STORY)</div>
+        <div class="story-nav">
+            <button class="nav-btn" onclick="changeStory(-1)">&#10094;</button>
+            <div class="story-indicator" id="storyIndicator">HİKAYE 1 / 3</div>
+            <button class="nav-btn" onclick="changeStory(1)">&#10095;</button>
+        </div>
+        <div class="main-stage" id="mainStage">
+            <div class="story-wrapper">
+                <div class="story-board">
+                    <div id="us-title" style="text-align:center; font-family:'Montserrat'; color:var(--cyan-accent); font-weight:700; margin-bottom:1rem; font-size:1.1rem;" class="fade-content">US01: Şeffaf SKT Güvencesi</div>
+                    <div class="story-row fade-content" id="row-role"><div class="row-left"><div class="row-icon" id="icon-role">👤</div>AS A ...</div><div class="row-right" id="text-role">Bilinçli bir Migros müşterisi olarak,</div></div>
+                    <div class="story-row fade-content" id="row-want"><div class="row-left"><div class="row-icon" id="icon-want">🎯</div>I WANT ...</div><div class="row-right" id="text-want">SKT seçeneklerini görebilmek istiyorum.</div></div>
+                    <div class="story-row fade-content" id="row-value"><div class="row-left"><div class="row-icon" id="icon-value">🎁</div>SO THAT ...</div><div class="row-right" id="text-value">İsrafı önleyebileyim.</div></div>
+                    <div class="action-buttons">
+                        <button class="btn" id="btnInvest" onclick="togglePanel('invest')">INVEST Analizi</button>
+                        <button class="btn" id="btnGherkin" onclick="togglePanel('gherkin')">Gherkin Senaryo</button>
+                    </div>
+                </div>
+
+                <!-- 3D İnteraktif Market Reyonu -->
+                <div id="canvas-3d-shelf" style="width:100%; height:320px; background:rgba(13, 22, 53, 0.4); border-radius:15px; margin-top:1.5rem; border:1px solid var(--card-border); overflow:hidden; position:relative;">
+                    <div style="position:absolute; top:10px; left:15px; font-size:0.75rem; color:var(--cyan-accent); font-family:'Montserrat'; z-index:10; font-weight:700;">
+                        <i class="bi bi-shop"></i> 3D DİNAMİK MARKET REYONU (SKT Alarm & İndirim Simülasyonu)
+                    </div>
+                    <div id="shelf-info" style="position:absolute; bottom:15px; left:15px; font-size:0.8rem; color:#fff; font-family:'Poppins'; z-index:10; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); pointer-events:none;">
+                        Reyondaki 3D paketlere tıklayarak SKT kontrol durumunu ve indirimleri test edin.
+                    </div>
+                </div>
+            </div>
+            
+            <div class="side-panel" data-lenis-prevent>
+                <div id="panel-invest" class="panel-content">
+                    <div class="panel-title"><span id="invest-panel-title">INVEST Analizi</span><button class="close-btn" onclick="closePanel()">×</button></div>
+                    <div class="invest-grid" id="invest-container"></div>
+                </div>
+                <div id="panel-gherkin" class="panel-content">
+                    <div class="panel-title"><span id="gherkin-panel-title">Kabul Kriterleri (Gherkin)</span><button class="close-btn" onclick="closePanel()">×</button></div>
+                    <div id="gherkin-container"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">5.1. M-SKT / GS1-128 Barkod Tarama ve Kasa Engelleme Simülatörü</div>
+        <div class="scanner-wrapper">
+            <div class="scanner-canvas-container" id="canvas-3d-scanner">
+                <div class="scanner-title"><i class="bi bi-qr-code-scan"></i> 3D BARKOD TARAYICI SİMÜLATÖRÜ (Etkileşimli)</div>
+                <div class="laser-line" id="scanner-laser"></div>
+                <div class="scan-button-container">
+                    <button class="scanner-btn" onclick="startBarcodeScan('milk')">🥩 Et Okut (Taze - Onay)</button>
+                    <button class="scanner-btn" onclick="startBarcodeScan('meat_fresh')">🥩 Et Okut (Yakın Tarih - %20 İndirim)</button>
+                    <button class="scanner-btn" onclick="startBarcodeScan('meat_expired')">☣️ Et Okut (SKT Geçmiş - BLOKAJ)</button>
+                </div>
+            </div>
+            <div class="scanner-hud-panel" id="scanner-hud">
+                <div class="hud-header">M-SKT DECISION HUD v1.0</div>
+                <div class="hud-terminal" id="hud-terminal-output" data-lenis-prevent>
+                    <div class="hud-line muted">[SİSTEM] Beklemede. Lütfen okutulacak bir ürün seçin...</div>
+                </div>
+                <div class="hud-status-box info" id="hud-status-badge">READY</div>
+            </div>
+        </div>
+
+        <div class="section-title">6. LUNA SİSTEM MİMARİSİ (UML USE CASE)</div>
+        <div class="architecture-stage">
+            <div class="uml-container">
+                <div class="mermaid">
+                    flowchart LR
+                        subgraph LUNA ["LUNA SKT & Sipariş Yönetim Sistemi"]
+                            direction TB
+                            UC1(["SKT Tercihi Belirleme"])
+                            UC2(["İndirimli Yakın SKT Seçimi"])
+                            UC3(["Son Şans Kategorisinde Gezinme"])
+                            UC4(["SKT Hatırlatma Bildirimi Alma"])
+                            UC5(["Yemek Tarifi Görüntüleme"])
+                        end
+
+                        Musteri(("👤 Bilinçli<br/>Müşteri"))
+                        Algoritma(("⚙️ LUNA SKT<br/>Algoritması"))
+
+                        Musteri --> UC1
+                        Musteri --> UC3
+                        Musteri --> UC4
+
+                        UC2 -.->|«extend»| UC1
+                        UC4 -.->|«include»| UC5
+
+                        Algoritma --> UC4
+                        Algoritma -.->|"Veritabanı Taraması"| UC3
+                </div>
+            </div>
+            <div class="specs-container" data-lenis-prevent>
+                <div class="spec-card">
+                    <div class="spec-title"><span>UC01</span> Şeffaf SKT Tercihi ve İndirim</div>
+                    <div class="spec-line"><span class="spec-label lbl-pre">Ön Koşul:</span> Sistemde SKT'sine 2 gün kalmış stok bulunmalıdır.</div>
+                    <div class="spec-line"><span class="spec-label lbl-post">Son Koşul:</span> Ürün indirimli fiyattan rezerve edilir.</div>
+                </div>
+                <div class="spec-card" style="border-left-color: var(--blue-accent);">
+                    <div class="spec-title"><span style="background: rgba(58, 123, 213, 0.15); color: var(--blue-accent);">UC02</span> Evde İsrafı Önle Bildirimi</div>
+                    <div class="spec-line"><span class="spec-label lbl-pre">Ön Koşul:</span> Kart ile alınmış ve SKT'sine 1 gün kalmış taze gıda kaydı olmalıdır.</div>
+                    <div class="spec-line"><span class="spec-label lbl-post">Son Koşul:</span> Push bildirimi atılır ve tarif sayfasına yönlendirilir («include»).</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">7. DENEYİM YOLCULUĞU (STORYBOARD)</div>
+
+        <div class="storyboard-container">
+            <!-- STORYBOARD 1 -->
+            <div class="sb-section">
+                <h2 class="sb-main-title">GÜVENLİ ALIŞVERİŞ, <span>DOĞRU KARAR!</span></h2>
+                <div class="sb-subtitle">Şeffaf SKT Arayüzü ile Veriye Dayalı Karar Verme Süreci</div>
+
+                <div class="sb-grid">
+                    <div class="sb-panel theme-purple">
+                        <div class="sb-header"><div class="sb-num">1</div><div class="sb-phase">TETİKLEYİCİ (BAĞLAM)</div></div>
+                        <div class="sb-image"><img src="~/photos/h1k1.png" alt="Canva 1"></div>
+                        <div class="sb-footer">Akşam menüsü planlıyor. Sipariş vermesi gerek.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-blue">
+                        <div class="sb-header"><div class="sb-num">2</div><div class="sb-phase">PROBLEM ANI (AS-IS)</div></div>
+                        <div class="sb-image"><img src="~/photos/h1k2.png" alt="Canva 2"></div>
+                        <div class="sb-footer">Geçmişteki bozuk et deneyimi yüzünden güvensiz.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-green">
+                        <div class="sb-header"><div class="sb-num">3</div><div class="sb-phase">KEŞİF (SİSTEMLE TEMAS)</div></div>
+                        <div class="sb-image"><img src="~/photos/h1k3.png" alt="Canva 3"></div>
+                        <div class="sb-footer">Uygulamada "Şeffaf SKT Katmanı" ile karşılaşır.</div>
+                    </div>
+                    <div class="sb-panel theme-yellow">
+                        <div class="sb-header"><div class="sb-num">4</div><div class="sb-phase">KARAR KÖPRÜSÜ</div></div>
+                        <div class="sb-image"><img src="~/photos/h1k4.png" alt="Canva 4"></div>
+                        <div class="sb-footer">"%30 İndirimli (SKT: 2 Gün)" seçeneğini tercih eder.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-purple">
+                        <div class="sb-header"><div class="sb-num">5</div><div class="sb-phase">AKSİYON (ÖDÜL ANI)</div></div>
+                        <div class="sb-image"><img src="~/photos/h1k5.png" alt="Canva 5"></div>
+                        <div class="sb-footer">"Tebrikler! %30 İndirim Kazandınız" tebriği ile onaylanır.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-green">
+                        <div class="sb-header"><div class="sb-num">6</div><div class="sb-phase">SONUÇ (NİHAİ FAYDA)</div></div>
+                        <div class="sb-image"><img src="~/photos/h1k6.png" alt="Canva 6"></div>
+                        <div class="sb-footer">Tasarruf eder, güvenle ve keyifle yemeğini pişirir.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- STORYBOARD 2 -->
+            <div class="sb-section">
+                <h2 class="sb-main-title">GÖRÜNMEZ İSRAFA, <span>AKILLI MÜDAHALE!</span></h2>
+                <div class="sb-subtitle">Money App Bildirimleri ile Müşteri Evindeki Muda'nın (İsrafın) Önlenmesi</div>
+
+                <div class="sb-grid">
+                    <div class="sb-panel theme-purple">
+                        <div class="sb-header"><div class="sb-num">1</div><div class="sb-phase">TETİKLEYİCİ (PROBLEM)</div></div>
+                        <div class="sb-image"><img src="~/photos/h2k1.png" alt="Canva 1"></div>
+                        <div class="sb-footer">Buzdolabında unutulmuş, bozulmuş tavuğu çöpe atar.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-blue">
+                        <div class="sb-header"><div class="sb-num">2</div><div class="sb-phase">VERİ TOPLAMA (GİRİŞ)</div></div>
+                        <div class="sb-image"><img src="~/photos/h2k2.png" alt="Canva 2"></div>
+                        <div class="sb-footer">Kasada okutulan Money Kart ile SKT verisi LUNA'ya işlenir.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-green">
+                        <div class="sb-header"><div class="sb-num">3</div><div class="sb-phase">GÖRÜNMEZ RİSK</div></div>
+                        <div class="sb-image"><img src="~/photos/h2k3.png" alt="Canva 3"></div>
+                        <div class="sb-footer">Yoğun çalışma temposunda yeni tavuğun SKT'si yine unutulur.</div>
+                    </div>
+                    <div class="sb-panel theme-yellow">
+                        <div class="sb-header"><div class="sb-num">4</div><div class="sb-phase">SİSTEM MÜDAHALESİ</div></div>
+                        <div class="sb-image"><img src="~/photos/h2k4.png" alt="Canva 4"></div>
+                        <div class="sb-footer">Saat 17:00'da SKT uyarısı ve yemek tarifi bildirimi gelir.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-purple">
+                        <div class="sb-header"><div class="sb-num">5</div><div class="sb-phase">ETKİLEŞİM (ÇÖZÜM)</div></div>
+                        <div class="sb-image"><img src="~/photos/h2k5.png" alt="Canva 5"></div>
+                        <div class="sb-footer">Bildirime tıklar, pratik tarifi inceler ve karar verir.</div>
+                        <div class="sb-arrow">➔</div>
+                    </div>
+                    <div class="sb-panel theme-green">
+                        <div class="sb-header"><div class="sb-num">6</div><div class="sb-phase">SONUÇ (NİHAİ FAYDA)</div></div>
+                        <div class="sb-image"><img src="~/photos/h2k6.png" alt="Canva 6"></div>
+                        <div class="sb-footer">Muda önlenir, bütçe korunur ve sağlıklı akşam yemeği yenir.</div>
+                    </div>
+                </div>
+
+                <!-- 3D Akıllı Buzdolabı -->
+                <div id="canvas-3d-fridge" style="width:100%; height:380px; background:rgba(13, 22, 53, 0.4); border-radius:15px; margin-top:1.5rem; border:1px solid var(--card-border); overflow:hidden; position:relative;">
+                    <div style="position:absolute; top:10px; left:15px; font-size:0.75rem; color:#f8b500; font-family:'Montserrat'; z-index:10; font-weight:700;">
+                        <i class="bi bi-snow2"></i> 3D AKILLI BUZDOLABI SİMÜLASYONU (Kapağa Tıkla & Aç/Kapat)
+                    </div>
+                    <div id="fridge-info" style="position:absolute; bottom:15px; left:15px; font-size:0.8rem; color:#fff; font-family:'Poppins'; z-index:10; background:rgba(0,0,0,0.6); padding:8px 12px; border-radius:6px; border:1px solid rgba(255,255,255,0.1); pointer-events:none;">
+                        Buzdolabının kapaklarına tıklayarak açın. İçindeki tavuk ürününe tıklayarak Money App bildirimini tetikleyin.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section-title">8. STORY MAPPING & YOL HARİTASI</div>
+        <div class="mapping-container" data-lenis-prevent>
+            <table class="mapping-table">
+                <thead>
+                    <tr>
+                        <th>OMURGA</th>
+                        <th>MVP (V1.0 - İsrafı Önle)</th>
+                        <th>V2 (Geliştirme)</th>
+                        <th>V3 (Genişleme)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="col-main">Keşfet & İncele</td>
+                        <td class="mvp-cell">Şeffaf SKT Bilgisi</td>
+                        <td>"Son Şans" Kategorisi</td>
+                        <td>Akıllı Tarif Önerileri</td>
+                    </tr>
+                    <tr>
+                        <td class="col-main">Sepet Yönetimi</td>
+                        <td class="mvp-cell">İndirimli SKT Seçimi</td>
+                        <td>Stok Validasyonu</td>
+                        <td>Adil Dağıtım Limiti</td>
+                    </tr>
+                    <tr>
+                        <td class="col-main">Bildirim & Takip</td>
+                        <td class="mvp-cell">-</td>
+                        <td>SKT Hatırlatıcı</td>
+                        <td>İade Durumu Entegrasyonu</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section-title">9. ARAYÜZ TASARIMI VE PROTOTİP (FİGMA)</div>
+        <div class="figma-wrapper">
+            <iframe class="figma-iframe" src="https://embed.figma.com/proto/Ex4XTrDufYA7XxOZUga2mC/Untitled?page-id=0%3A1&node-id=21-8&p=f&viewport=666%2C184%2C0.22&scaling=scale-down&content-scaling=fixed&embed-host=share&hide-ui=1" allowfullscreen></iframe>
+        </div>
+
+    </div>
+
+    <script>
+        // === LENIS SMOOTH SCROLL İLKLENDİRME ===
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            direction: 'vertical',
+            gestureDirection: 'vertical',
+            smooth: true,
+            mouseMultiplier: 1.1,
+            smoothTouch: false,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
+        requestAnimationFrame(raf);
+
+        // === HİKAYELER VERİ TABANI ===
+        const storiesData = [
+            {
+                id: 1, title: "US01: ŞEFFAF SKT TERCİH SİSTEMİ (Sanal Market)", roleIcon: "👤", role: "Bilinçli bir Migros Sanal Market müşterisi olarak,",
+                wantIcon: "🛒", want: "Sepetime et veya süt ürünü eklerken <span class='highlight'>'yakın tarihli indirimli ürün'</span> seçeneğini tercih edebilmek istiyorum.",
+                valueIcon: "🛡️", value: "Böylece <span class='highlight'>%30 indirimle alışverişimi tamamlamak ve gıda israfına engel olmak istiyorum.</span>",
+                invest: [
+                    { l: "I", c: "", n: "Independent", d: "Ödeme veya filtrelerden bağımsızdır." }, { l: "N", c: "#22d3ee", n: "Negotiable", d: "İndirim oranı (%30) pazarlığa açıktır." }, { l: "V", c: "#34d399", n: "Valuable", d: "Firmayı Muda (israf) maliyetinden kurtarır." },
+                    { l: "E", c: "", n: "Estimable", d: "Veritabanı entegrasyon eforu nettir." }, { l: "S", c: "#22d3ee", n: "Small", d: "Tek bir Sprint içinde canlıya alınabilir." }, { l: "T", c: "#34d399", n: "Testable", d: "Fiyatın değişimi otomatik testlerle doğrulanabilir." }
+                ],
+                gherkin: [
+                    { t: "Senaryo 1: Yakın SKT İndirim Seçimi", g: "Kullanıcı ürün sayfasındayken,", w: "İndirimli seçeneği eklediğinde,", th: "Fiyat %30 düşmeli ve ekranda 'Tebrikler! %30 İndirim Kazandınız' mesajı çıkmalıdır." },
+                    { t: "Senaryo 2: Stokta Ürün Olmaması", g: "SKT'sine 2 gün kalmış stok yoksa,", w: "Kullanıcı girdiğinde,", th: "İndirimli SKT seçeneği disabled olmalıdır." },
+                    { t: "Senaryo 3: Sepette SKT Dolması", g: "Kullanıcı sepette ürün bekletirken SKT dolarsa,", w: "Ödemeye geçmek istediğinde,", th: "Sistem ürünü sepetten otomatik çıkarmalıdır." }
+                ]
+            },
+            {
+                id: 2, title: "US02: EVDE İSRAFI ÖNLE BİLDİRİMİ (Money App)", roleIcon: "📱", role: "Bilinçli bir Migros müşterisi olarak,",
+                wantIcon: "🔔", want: "Satın aldığım ürünün SKT'sinin son gününde telefonuma <span class='highlight'>hatırlatıcı ve yemek tarifi</span> içeren bildirim almak istiyorum.",
+                valueIcon: "♻️", value: "Ürünlerin bozulmasını engelleyerek <span class='highlight'>israfı önlemek ve bütçemi korumak istiyorum.</span>",
+                invest: [
+                    { l: "I", c: "", n: "Independent", d: "Ana alışveriş akışını bozmaz." }, { l: "N", c: "#22d3ee", n: "Negotiable", d: "Bildirimin saati esnektir." }, { l: "V", c: "#34d399", n: "Valuable", d: "Uygulama kullanım süresini yükseltir." },
+                    { l: "E", c: "", n: "Estimable", d: "Entegrasyon süresi tahmin edilebilir." }, { l: "S", c: "#22d3ee", n: "Small", d: "Mevcut altyapı üzerinde geliştirilebilir." }, { l: "T", c: "#34d399", n: "Testable", d: "Bildirimin düşüp düşmediği test edilebilir." }
+                ],
+                gherkin: [
+                    { t: "Senaryo 1: Zamanında Bildirim", g: "SKT yarına doluyorsa,", w: "Sistem saati 17:00 olduğunda,", th: "Push bildirimi gitmelidir." },
+                    { t: "Senaryo 2: Tarife Yönlendirme", g: "Kullanıcı bildirime tıkladığında,", w: "Uygulama açıldığında,", th: "Doğrudan yemek tarifi sayfasına ulaşmalıdır." },
+                    { t: "Senaryo 3: İade Edilmiş Ürün", g: "Ürün iade edilmişse,", w: "Bildirim batch'i tetiklendiğinde,", th: "Hatırlatıcı bildirim GÖNDERİLMEMELİDİR." }
+                ]
+            },
+            {
+                id: 3, title: "US03: SON ŞANS SEKMESİ (Sanal Market)", roleIcon: "🌍", role: "Fırsat takip eden Migros kullanıcısı olarak,",
+                wantIcon: "🏷️", want: "SKT'si yaklaşan ürünlerin <span class='highlight'>yüksek indirimlerle listelendiği</span> özel bir 'Son Şans' sekmesi görmek istiyorum.",
+                valueIcon: "📉", value: "Bugün tüketeceğim ürünleri uygun fiyata alırken <span class='highlight'>israfı azaltmaya katkıda bulunmak istiyorum.</span>",
+                invest: [
+                    { l: "I", c: "", n: "Independent", d: "Kategori yapısından ayrı çalışabilir." }, { l: "N", c: "#22d3ee", n: "Negotiable", d: "Hangi ürünlerin dahil edileceği değişebilir." }, { l: "V", c: "#34d399", n: "Valuable", d: "Kırmızı alarma geçen stoklar eritilir." },
+                    { l: "E", c: "", n: "Estimable", d: "Sorgu algoritmasının yükü nettir." }, { l: "S", c: "#22d3ee", n: "Small", d: "Sadece yeni bir query yazılacaktır." }, { l: "T", c: "#34d399", n: "Testable", d: "Ürünlerin sekmeye otomatik düştüğü test edilir." }
+                ],
+                gherkin: [
+                    { t: "Senaryo 1: Sekmeye Düşmesi", g: "SKT'ye tam 2 gün kaldığında,", w: "Gece güncellemesi çalıştığında,", th: "Ürün Son Şans kategorisine eklenmelidir." },
+                    { t: "Senaryo 2: Süresi Dolan Ürün", g: "SKT tarihi geçmiş ise,", w: "Kullanıcı sayfayı yenilediğinde,", th: "Ürün listeden tamamen kaldırılmalıdır." },
+                    { t: "Senaryo 3: Maksimum Alım Limiti", g: "Sepete ekleme yaparken,", w: "Adil dağıtım limitinin üzerinde seçtiğinde,", th: "Artı butonu pasif olmalı ve uyarı çıkmalıdır." }
+                ]
+            }
+        ];
+
+        let currentIndex = 0;
+        const elTitle = document.getElementById('us-title'); const elRole = document.getElementById('text-role'); const elWant = document.getElementById('text-want'); const elValue = document.getElementById('text-value'); const elIndicator = document.getElementById('storyIndicator'); const fadeElements = document.querySelectorAll('.fade-content');
+        const investContainer = document.getElementById('invest-container'); const gherkinContainer = document.getElementById('gherkin-container'); const mainStage = document.getElementById('mainStage');
+
+        function changeStory(direction) {
+            currentIndex += direction;
+            if (currentIndex < 0) currentIndex = storiesData.length - 1; if (currentIndex >= storiesData.length) currentIndex = 0;
+            fadeElements.forEach(el => el.classList.add('fade-out'));
+            setTimeout(() => {
+                const data = storiesData[currentIndex];
+                elIndicator.innerText = `HİKAYE ${currentIndex + 1} / 3`; elTitle.innerText = data.title;
+                elRole.innerHTML = data.role; elWant.innerHTML = data.want; elValue.innerHTML = data.value;
+                investContainer.innerHTML = ''; data.invest.forEach(i => { investContainer.innerHTML += `<div class="invest-item"><div class="invest-letter" style="color:${i.c || '#f8b500'}">${i.l}</div><div class="invest-desc"><strong>${i.n}</strong><span>${i.d}</span></div></div>`; });
+                gherkinContainer.innerHTML = ''; data.gherkin.forEach(g => { gherkinContainer.innerHTML += `<div class="gherkin-scenario"><span class="scenario-title">${g.t}</span><div class="g-line"><span class="kw" style="color:#f8b500;">Given</span> ${g.g}</div><div class="g-line"><span class="kw" style="color:var(--cyan-accent);">When</span> ${g.w}</div><div class="g-line"><span class="kw" style="color:var(--green-accent);">Then</span> ${g.th}</div></div>`; });
+                fadeElements.forEach(el => el.classList.remove('fade-out'));
+            }, 300);
+        }
+
+        const panelInvest = document.getElementById('panel-invest'); const panelGherkin = document.getElementById('panel-gherkin'); const btnInvest = document.getElementById('btnInvest'); const btnGherkin = document.getElementById('btnGherkin');
+        function togglePanel(type) { if (!mainStage.classList.contains('panel-active')) mainStage.classList.add('panel-active'); btnInvest.classList.remove('active'); btnGherkin.classList.remove('active'); panelInvest.classList.remove('active'); panelGherkin.classList.remove('active'); if (type === 'invest') { panelInvest.classList.add('active'); btnInvest.classList.add('active'); } else if (type === 'gherkin') { panelGherkin.classList.add('active'); btnGherkin.classList.add('active'); } }
+        function closePanel() { mainStage.classList.remove('panel-active'); btnInvest.classList.remove('active'); btnGherkin.classList.remove('active'); setTimeout(() => { panelInvest.classList.remove('active'); panelGherkin.classList.remove('active'); }, 500); }
+
+        changeStory(0);
+
+        // === ARKA PLAN 3D WEBGL KAMERA YÖRÜNGE UÇUŞU SİMÜLASYONU (Master-Level Frontend) ===
+        (function() {
+            const canvas = document.getElementById('particles-canvas');
+            if (!canvas) return;
+
+            // Scene, Camera, Renderer
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            const renderer = new THREE.WebGLRenderer({
+                canvas: canvas,
+                antialias: true,
+                alpha: true
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+
+            // 3D Spline Eğrisi (Uçuş Yörüngesi - Aşama Aşama Y ekseninde aşağı iner)
+            const splinePoints = [
+                new THREE.Vector3(0, 0, 40),
+                new THREE.Vector3(12, -15, 20),
+                new THREE.Vector3(-12, -35, 0),
+                new THREE.Vector3(10, -55, -20),
+                new THREE.Vector3(-10, -75, -40),
+                new THREE.Vector3(12, -95, -60),
+                new THREE.Vector3(-8, -115, -80),
+                new THREE.Vector3(8, -135, -100),
+                new THREE.Vector3(0, -155, -120)
+            ];
+            const cameraRoute = new THREE.CatmullRomCurve3(splinePoints);
+
+            // Başlangıç Kamera Pozisyonu
+            camera.position.copy(cameraRoute.getPointAt(0));
+
+            // Dinamik Yumuşak Glow Dokusu
+            function createGlowTexture() {
+                const c = document.createElement('canvas');
+                c.width = 32;
+                c.height = 32;
+                const ctx2d = c.getContext('2d');
+                const grad = ctx2d.createRadialGradient(16, 16, 0, 16, 16, 16);
+                grad.addColorStop(0, 'rgba(255, 255, 255, 1)');
+                grad.addColorStop(0.3, 'rgba(255, 255, 255, 0.8)');
+                grad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+                ctx2d.fillStyle = grad;
+                ctx2d.fillRect(0, 0, 32, 32);
+                return new THREE.CanvasTexture(c);
+            }
+            const glowTex = createGlowTexture();
+
+            // Partikül Veri Düzenlemesi (Spline Etrafında Girdap Tüneli)
+            const particleCount = 1800;
+            const geometry = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+
+            const colorOrange = new THREE.Color(0xf97316); // Migros Turuncu
+            const colorCyan = new THREE.Color(0x22d3ee);   // LUNA Mavi/Cyan
+            const colorPurple = new THREE.Color(0xa855f7); // Premium Mor
+
+            for (let i = 0; i < particleCount; i++) {
+                const t = i / particleCount;
+                const splinePoint = cameraRoute.getPointAt(t);
+
+                // Eğri etrafında helisel / spiral sapma vererek tünel efekti yaratıyoruz
+                const angle = Math.random() * Math.PI * 2;
+                const radius = 6 + Math.random() * 15; // Tünel çapı
+                
+                positions[i * 3] = splinePoint.x + Math.cos(angle) * radius;
+                positions[i * 3 + 1] = splinePoint.y + Math.sin(angle) * radius + (Math.random() - 0.5) * 4;
+                positions[i * 3 + 2] = splinePoint.z + (Math.random() - 0.5) * 10;
+
+                // Renk dağılımı
+                const randColor = Math.random();
+                let chosenColor = colorCyan;
+                if (randColor > 0.65) chosenColor = colorOrange;
+                else if (randColor > 0.45) chosenColor = colorPurple;
+
+                colors[i * 3] = chosenColor.r;
+                colors[i * 3 + 1] = chosenColor.g;
+                colors[i * 3 + 2] = chosenColor.b;
+            }
+
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+            const material = new THREE.PointsMaterial({
+                size: 0.35,
+                vertexColors: true,
+                map: glowTex,
+                transparent: true,
+                opacity: 0.65,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+
+            const particles = new THREE.Points(geometry, material);
+            scene.add(particles);
+
+            // Fare Etkileşimi Değişkenleri
+            let targetMouse = { x: 0, y: 0 };
+            let currentMouse = { x: 0, y: 0 };
+
+            window.addEventListener('mousemove', (e) => {
+                targetMouse.x = (e.clientX - window.innerWidth / 2) * 0.008;
+                targetMouse.y = (e.clientY - window.innerHeight / 2) * 0.008;
+            });
+
+            // Kaydırma (Scroll) Yönetimi
+            let targetScrollProgress = 0;
+            let currentScrollProgress = 0;
+
+            function updateScrollProgress() {
+                const scrollTop = window.scrollY || document.documentElement.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+                if (scrollHeight > 0) {
+                    targetScrollProgress = scrollTop / scrollHeight;
+                }
+            }
+
+            window.addEventListener('scroll', updateScrollProgress);
+            updateScrollProgress();
+
+            // Render Döngüsü
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+
+                const elapsed = clock.getElapsedTime();
+
+                // İnertial (Yumuşak) Interpolasyonlar (Lerp)
+                currentScrollProgress += (targetScrollProgress - currentScrollProgress) * 0.06;
+                currentMouse.x += (targetMouse.x - currentMouse.x) * 0.05;
+                currentMouse.y += (targetMouse.y - currentMouse.y) * 0.05;
+
+                // Kamera pozisyonunu spline üzerindeki kaydırma yüzdesine göre belirle
+                const camPos = cameraRoute.getPointAt(currentScrollProgress);
+                camera.position.copy(camPos);
+
+                // Kameranın bakacağı hedefi (LookAt) biraz ilerideki yörünge noktası yap (Akıcı dönüşler sağlar)
+                const lookAheadProgress = Math.min(currentScrollProgress + 0.03, 0.999);
+                const lookAtTarget = cameraRoute.getPointAt(lookAheadProgress);
+                
+                // Fare hareketine bağlı mikro sarsıntı / kayma efekti (Parallax)
+                camera.position.x += currentMouse.x;
+                camera.position.y += -currentMouse.y;
+                
+                camera.lookAt(lookAtTarget);
+
+                // Partiküllerin kendi etrafında yavaşça süzülme hareketi
+                particles.rotation.y = elapsed * 0.005;
+                particles.rotation.z = elapsed * 0.003;
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+
+            // Yeniden Boyutlandırma
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        })();
+
+        // ==========================================
+        // === THREE.JS 3D ANİMASYON ENTEGRASYONU ===
+        // ==========================================
+
+        // MOUSE DRAG ROTATION HELPER (OrbitControls Alternatifi - Hatasız & Saf JS)
+        function addDragControls(domElement, group, factor = 0.005) {
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+            
+            domElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            });
+            
+            domElement.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const deltaMove = {
+                    x: e.clientX - previousMousePosition.x,
+                    y: e.clientY - previousMousePosition.y
+                };
+                
+                group.rotation.y += deltaMove.x * factor;
+                group.rotation.x += deltaMove.y * factor;
+                
+                previousMousePosition = {
+                    x: e.clientX,
+                    y: e.clientY
+                };
+            });
+            
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+            
+            // Mobil Dokunmatik Desteği
+            domElement.addEventListener('touchstart', (e) => {
+                if(e.touches.length === 1) {
+                    isDragging = true;
+                    previousMousePosition = {
+                        x: e.touches[0].clientX,
+                        y: e.touches[0].clientY
+                    };
+                }
+            });
+            
+            domElement.addEventListener('touchmove', (e) => {
+                if (!isDragging || e.touches.length !== 1) return;
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousMousePosition.x,
+                    y: e.touches[0].clientY - previousMousePosition.y
+                };
+                
+                group.rotation.y += deltaMove.x * factor;
+                group.rotation.x += deltaMove.y * factor;
+                
+                previousMousePosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            });
+            
+            domElement.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+        }
+
+        // 1. SCENE: DÖNEN 3D LOGO KÜBÜ (HEADER)
+        (function() {
+            const container = document.getElementById('canvas-3d-header');
+            if(!container) return;
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 100);
+            camera.position.z = 3.5;
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(180, 180);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // Parlayan Diamond/Baklava Şekli (Procedural)
+            const geometry = new THREE.OctahedronGeometry(1.1, 0);
+            const material = new THREE.MeshPhongMaterial({
+                color: 0xff8200,
+                emissive: 0x331a00,
+                specular: 0xffffff,
+                shininess: 80,
+                flatShading: true,
+                transparent: true,
+                opacity: 0.9
+            });
+            
+            const mesh = new THREE.Mesh(geometry, material);
+            scene.add(mesh);
+            
+            // Tel kafes katmanı (Wireframe)
+            const wireGeometry = new THREE.OctahedronGeometry(1.12, 0);
+            const wireMaterial = new THREE.MeshBasicMaterial({ color: 0x22d3ee, wireframe: true, transparent: true, opacity: 0.4 });
+            const wireMesh = new THREE.Mesh(wireGeometry, wireMaterial);
+            mesh.add(wireMesh);
+            
+            const light1 = new THREE.DirectionalLight(0xffffff, 1);
+            light1.position.set(5, 5, 5);
+            scene.add(light1);
+            
+            const light2 = new THREE.PointLight(0x22d3ee, 1, 10);
+            light2.position.set(-5, -5, 2);
+            scene.add(light2);
+            
+            function run() {
+                requestAnimationFrame(run);
+                mesh.rotation.y += 0.012;
+                mesh.rotation.x += 0.006;
+                renderer.render(scene, camera);
+            }
+            run();
+        })();
+
+        // 2. SCENE: 3D PAYDAŞ ETKİLEŞİM AĞI (SECTION 3)
+        (function() {
+            const container = document.getElementById('canvas-3d-network');
+            const infoText = document.getElementById('network-info');
+            if(!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 8);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            const nodesGroup = new THREE.Group();
+            scene.add(nodesGroup);
+            
+            // Drag Kontrolünü Ekle
+            addDragControls(renderer.domElement, nodesGroup, 0.005);
+            
+            // Paydaş Düğümleri Tanımları
+            const stakeholders = [
+                { name: "Kasiyer", color: 0xf97316, pos: new THREE.Vector3(-2.2, 0.8, 0), desc: "Kasiyer: Kasada barkodları hızlıca okutur ve sistem blokesi veya dinamik indirim kararını yönetir." },
+                { name: "Müşteri", color: 0x22d3ee, pos: new THREE.Vector3(2.2, 0.8, 0), desc: "Müşteri: Sanal Market'te SKT tercihleri yapar ve Money App bildirimleriyle israfı önler." },
+                { name: "Mağaza Müdürü", color: 0xeab308, pos: new THREE.Vector3(0, -1.5, 1.5), desc: "Mağaza Müdürü: Mağazada FIFO düzenini koordine eder ve istisnai durumlarda şifresiyle bloke kaldırır." },
+                { name: "Sistem / BT", color: 0x34d399, pos: new THREE.Vector3(0, 1.8, -1), desc: "Sistem/BT: Entegrasyon altyapısını işletir, 150 ms altında kararlar üretir ve SMS/App bildirimlerini yönetir." }
+            ];
+            
+            const meshes = [];
+            
+            // Küreleri oluşturma
+            stakeholders.forEach(s => {
+                const geom = new THREE.SphereGeometry(0.42, 32, 32);
+                const mat = new THREE.MeshPhongMaterial({
+                    color: s.color,
+                    emissive: s.color * 0.15,
+                    shininess: 100,
+                    specular: 0xffffff
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.copy(s.pos);
+                mesh.userData = { name: s.name, desc: s.desc, baseColor: s.color };
+                nodesGroup.add(mesh);
+                meshes.push(mesh);
+            });
+            
+            // Bağlantı Çizgileri oluşturma
+            const lineMat = new THREE.LineBasicMaterial({ color: 0x3a7bd5, transparent: true, opacity: 0.5 });
+            for(let i = 0; i < meshes.length; i++) {
+                for(let j = i + 1; j < meshes.length; j++) {
+                    const lineGeom = new THREE.BufferGeometry().setFromPoints([meshes[i].position, meshes[j].position]);
+                    const line = new THREE.Line(lineGeom, lineMat);
+                    nodesGroup.add(line);
+                }
+            }
+            
+            // Işıklandırma
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            dirLight.position.set(3, 4, 5);
+            scene.add(dirLight);
+            
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.3);
+            scene.add(ambLight);
+            
+            // Raycasting & Tıklama Olayı
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            
+            container.addEventListener('click', (e) => {
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(meshes);
+                
+                meshes.forEach(m => {
+                    m.material.emissive.setHex(m.userData.baseColor * 0.15);
+                    m.scale.set(1, 1, 1);
+                });
+                
+                if (intersects.length > 0) {
+                    const target = intersects[0].object;
+                    target.material.emissive.setHex(0xffffff); // Parlama
+                    target.scale.set(1.25, 1.25, 1.25);
+                    
+                    // Sağa kayan animasyonlu kart oluştur
+                    const sColorHex = '#' + target.userData.baseColor.toString(16).padStart(6, '0');
+                    const toast = document.createElement('div');
+                    toast.style.cssText = `
+                        background: rgba(13, 22, 53, 0.95);
+                        border-left: 4px solid ${sColorHex};
+                        border: 1px solid rgba(70, 130, 255, 0.35);
+                        border-left-width: 4px;
+                        border-left-color: ${sColorHex};
+                        padding: 10px 12px;
+                        border-radius: 8px;
+                        font-size: 0.75rem;
+                        color: #fff;
+                        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+                        transform: translateX(120%);
+                        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                        pointer-events: auto;
+                        font-family: 'Poppins', sans-serif;
+                        backdrop-filter: blur(8px);
+                        user-select: none;
+                    `;
+                    
+                    toast.innerHTML = `
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; font-family:'Montserrat'; font-weight:800; font-size:0.8rem; color:${sColorHex};">
+                            <span>${target.userData.name}</span>
+                            <span onclick="this.parentElement.parentElement.style.transform = 'translateX(120%)'; setTimeout(() => this.parentElement.parentElement.remove(), 400);" style="cursor:pointer; font-size:14px; color:rgba(255,255,255,0.5); font-weight:700; padding: 0 4px;">&times;</span>
+                        </div>
+                        <div style="line-height:1.4; color:#cbd5e1;">${target.userData.desc.replace(target.userData.name + ': ', '').replace(target.userData.name + ' ', '')}</div>
+                    `;
+                    
+                    const containerToasts = document.getElementById('network-toast-container');
+                    if (containerToasts) {
+                        // Max 3 kart ile sınırla
+                        if (containerToasts.children.length >= 3) {
+                            const first = containerToasts.children[0];
+                            first.style.transform = 'translateX(120%)';
+                            setTimeout(() => first.remove(), 400);
+                        }
+                        containerToasts.appendChild(toast);
+                        setTimeout(() => { toast.style.transform = 'translateX(0)'; }, 50);
+                        
+                        // 6 saniye sonra otomatik kaybolsun
+                        setTimeout(() => {
+                            if (toast.parentNode) {
+                                toast.style.transform = 'translateX(120%)';
+                                setTimeout(() => toast.remove(), 400);
+                            }
+                        }, 6000);
+                    }
+                }
+            });
+            
+            function run() {
+                requestAnimationFrame(run);
+                nodesGroup.rotation.y += 0.003;
+                renderer.render(scene, camera);
+            }
+            run();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+
+        // 3. SCENE: 3D DİNAMİK MARKET REYONU (SECTION 5)
+        (function() {
+            const container = document.getElementById('canvas-3d-shelf');
+            const infoText = document.getElementById('shelf-info');
+            if(!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 7.5);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            const shelfGroup = new THREE.Group();
+            scene.add(shelfGroup);
+            
+            // Drag Kontrolünü Ekle
+            addDragControls(renderer.domElement, shelfGroup, 0.004);
+            
+            // Reyon Rafı Yapısı (Ahşap/Metal kutular)
+            const shelfMat = new THREE.MeshPhongMaterial({ color: 0x1e293b, shininess: 30 });
+            // Taban
+            const base = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.15, 1.2), shelfMat);
+            base.position.y = -1.6;
+            shelfGroup.add(base);
+            
+            // Orta Raf
+            const midShelf = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.1, 1.2), shelfMat);
+            midShelf.position.y = -0.1;
+            shelfGroup.add(midShelf);
+            
+            // Üst Raf
+            const topShelf = new THREE.Mesh(new THREE.BoxGeometry(4.5, 0.1, 1.2), shelfMat);
+            topShelf.position.y = 1.3;
+            shelfGroup.add(topShelf);
+            
+            // Sol/Sağ Direkler
+            const poleGeom = new THREE.BoxGeometry(0.1, 3.1, 0.1);
+            const SolPole = new THREE.Mesh(poleGeom, shelfMat); SolPole.position.set(-2.2, -0.1, 0); shelfGroup.add(SolPole);
+            const SagPole = new THREE.Mesh(poleGeom, shelfMat); SagPole.position.set(2.2, -0.1, 0); shelfGroup.add(SagPole);
+            
+            // Ürün Tanımları
+            const products = [
+                // ÜST RAF: Süt Kutuları (Taze, Green)
+                { type: "cylinder", size: [0.22, 0.22, 0.6, 16], color: 0x34d399, pos: new THREE.Vector3(-1.2, 1.6, 0), state: "steady", name: "Migros Günlük Süt (Taze)", desc: "SKT: 6 Gün kaldı. Güvenli ürün, normal fiyattan kasadan satış onaylandı." },
+                { type: "cylinder", size: [0.22, 0.22, 0.6, 16], color: 0x34d399, pos: new THREE.Vector3(0, 1.6, 0), state: "steady", name: "Süzme Peynir (Taze)", desc: "SKT: 12 Gün kaldı. Ürün taze, normal fiyattan satış onaylandı." },
+                { type: "cylinder", size: [0.22, 0.22, 0.6, 16], color: 0x34d399, pos: new THREE.Vector3(1.2, 1.6, 0), state: "steady", name: "Organik Yoğurt (Taze)", desc: "SKT: 8 Gün kaldı. Ürün taze, normal fiyattan satış onaylandı." },
+                
+                // ORTA RAF: Tavuk/Et Paketleri (Dinamik İndirimli, Orange)
+                { type: "box", size: [0.5, 0.2, 0.7], color: 0xf97316, pos: new THREE.Vector3(-1.1, 0.15, 0), state: "pulse", name: "Tavuk Göğsü 600g (Yakın Tarih)", desc: "SKT: 2 Gün kaldı! Otomatik olarak %20 Yakın Tarih İndirimi yansıtıldı. İsraf önlendi." },
+                { type: "box", size: [0.5, 0.2, 0.7], color: 0xf97316, pos: new THREE.Vector3(1.1, 0.15, 0), state: "pulse", name: "Dana Kıyma 500g (Yakın Tarih)", desc: "SKT: 1 Gün kaldı! %20 indirim uygulandı. Müşteri bilinçli olarak tasarruflu satın aldı." },
+                
+                // ALT RAF: Bozuk/SKT Geçmiş Ürünler (Blokajlı, Red Flashing)
+                { type: "box", size: [0.5, 0.2, 0.7], color: 0xef4444, pos: new THREE.Vector3(0, -1.35, 0), state: "flash", name: "Piliç Baget 1kg (SKT GEÇMİŞ!)", desc: "SKT: Dün doldu! Kasiyer barkodu okuttuğu anda KASA SATIŞI ENGELLENDİ! Bozuk ürünün müşteriye ulaşması engellendi." }
+            ];
+            
+            const productMeshes = [];
+            
+            products.forEach(p => {
+                let geom;
+                if(p.type === "box") {
+                    geom = new THREE.BoxGeometry(...p.size);
+                } else {
+                    geom = new THREE.CylinderGeometry(...p.size);
+                }
+                const mat = new THREE.MeshPhongMaterial({
+                    color: p.color,
+                    emissive: p.color * 0.1,
+                    shininess: 60
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.copy(p.pos);
+                mesh.userData = { name: p.name, desc: p.desc, state: p.state, baseColor: p.color };
+                shelfGroup.add(mesh);
+                productMeshes.push(mesh);
+            });
+            
+            // Işıklar
+            const light = new THREE.DirectionalLight(0xffffff, 1.2); light.position.set(2, 5, 5); scene.add(light);
+            const ambient = new THREE.AmbientLight(0xffffff, 0.35); scene.add(ambient);
+            
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            
+            container.addEventListener('click', (e) => {
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(productMeshes);
+                
+                productMeshes.forEach(m => {
+                    m.scale.set(1, 1, 1);
+                    m.material.emissive.setHex(m.userData.baseColor * 0.1);
+                });
+                
+                if (intersects.length > 0) {
+                    const obj = intersects[0].object;
+                    obj.scale.set(1.2, 1.2, 1.2);
+                    obj.material.emissive.setHex(0xffffff);
+                    
+                    let prefix = "";
+                    if(obj.userData.state === "flash") prefix = "🔴 ENGELLENDİ: ";
+                    if(obj.userData.state === "pulse") prefix = "🟡 %20 İNDİRİM: ";
+                    if(obj.userData.state === "steady") prefix = "🟢 ONAYLANDI (TAZE): ";
+                    
+                    infoText.innerHTML = `<strong>${prefix}${obj.userData.name}</strong><br/>${obj.userData.desc}`;
+                    infoText.style.borderColor = obj.userData.state === "flash" ? "#ef4444" : (obj.userData.state === "pulse" ? "#f97316" : "#34d399");
+                }
+            });
+            
+            let clock = new THREE.Clock();
+            function run() {
+                requestAnimationFrame(run);
+                const elapsed = clock.getElapsedTime();
+                
+                // Ürün animasyonları
+                productMeshes.forEach(m => {
+                    if(m.userData.state === "pulse") {
+                        const scale = 1 + Math.sin(elapsed * 4) * 0.05;
+                        m.scale.set(scale, scale, scale);
+                        m.material.emissive.setHex(m.userData.baseColor * (0.2 + Math.abs(Math.sin(elapsed * 4)) * 0.3));
+                    } else if (m.userData.state === "flash") {
+                        const flashVal = Math.floor(elapsed * 8) % 2 === 0;
+                        m.material.emissive.setHex(flashVal ? 0xff4b4b : 0x220000);
+                        m.rotation.y += 0.02;
+                    }
+                });
+                
+                shelfGroup.rotation.y = Math.sin(elapsed * 0.2) * 0.12; 
+                renderer.render(scene, camera);
+            }
+            run();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+
+        // 4. SCENE: 3D AKILLI BUZDOLABI (SECTION 7)
+        (function() {
+            const container = document.getElementById('canvas-3d-fridge');
+            const infoText = document.getElementById('fridge-info');
+            if(!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0.8, 6.5);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            const fridgeGroup = new THREE.Group();
+            scene.add(fridgeGroup);
+            
+            // Drag Kontrolü Ekle
+            addDragControls(renderer.domElement, fridgeGroup, 0.005);
+            
+            // 3D Buzdolabı Kasası (Gövde - İçi Boş Kabin Yapısı)
+            const metalMat = new THREE.MeshPhongMaterial({ color: 0x475569, shininess: 80, specular: 0xffffff, side: THREE.DoubleSide });
+            const fridgeBody = new THREE.Group();
+            fridgeBody.name = "fridgeBody";
+            
+            // Arka panel
+            const backPanel = new THREE.Mesh(new THREE.BoxGeometry(2.4, 4.0, 0.1), metalMat);
+            backPanel.name = "backPanel";
+            backPanel.position.set(0, 0, -1.95);
+            fridgeBody.add(backPanel);
+            
+            // Sol panel
+            const leftPanel = new THREE.Mesh(new THREE.BoxGeometry(0.1, 4.0, 2.0), metalMat);
+            leftPanel.name = "leftPanel";
+            leftPanel.position.set(-1.15, 0, -1.0);
+            fridgeBody.add(leftPanel);
+            
+            // Sağ panel
+            const rightPanel = new THREE.Mesh(new THREE.BoxGeometry(0.1, 4.0, 2.0), metalMat);
+            rightPanel.name = "rightPanel";
+            rightPanel.position.set(1.15, 0, -1.0);
+            fridgeBody.add(rightPanel);
+            
+            // Üst panel
+            const topPanel = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.1, 2.0), metalMat);
+            topPanel.name = "topPanel";
+            topPanel.position.set(0, 1.95, -1.0);
+            fridgeBody.add(topPanel);
+            
+            // Alt panel
+            const bottomPanel = new THREE.Mesh(new THREE.BoxGeometry(2.4, 0.1, 2.0), metalMat);
+            bottomPanel.name = "bottomPanel";
+            bottomPanel.position.set(0, -1.95, -1.0);
+            fridgeBody.add(bottomPanel);
+            
+            fridgeGroup.add(fridgeBody);
+            
+            // Buzdolabı Kapağı Hinge (Menteşe Grubu) Sol kenar menteşe
+            const doorHinge = new THREE.Group();
+            doorHinge.name = "doorHinge";
+            doorHinge.position.set(-1.2, 0, 0); 
+            fridgeGroup.add(doorHinge);
+            
+            const doorGeom = new THREE.BoxGeometry(2.4, 3.9, 0.15);
+            const doorMat = new THREE.MeshPhongMaterial({ color: 0x334155, shininess: 90, specular: 0xffffff });
+            const fridgeDoor = new THREE.Mesh(doorGeom, doorMat);
+            fridgeDoor.name = "fridgeDoor";
+            fridgeDoor.position.set(1.2, 0, 0.08); 
+            doorHinge.add(fridgeDoor);
+            
+            // Kulp
+            const handleGeom = new THREE.BoxGeometry(0.08, 0.8, 0.1);
+            const handleMat = new THREE.MeshPhongMaterial({ color: 0xe2e8f0 });
+            const doorHandle = new THREE.Mesh(handleGeom, handleMat);
+            doorHandle.name = "doorHandle";
+            doorHandle.position.set(2.2, 0, 0.16);
+            doorHinge.add(doorHandle);
+            
+            // Dolap içi Rafı ve Yiyecekler
+            const shelfInner = new THREE.Mesh(new THREE.BoxGeometry(2.2, 0.05, 1.8), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 }));
+            shelfInner.name = "shelfInner";
+            shelfInner.position.set(0, 0.4, -0.6);
+            fridgeGroup.add(shelfInner);
+            
+            // İçerideki kritik tavuk paketi
+            const chickenGeom = new THREE.BoxGeometry(0.6, 0.15, 0.5);
+            const chickenMat = new THREE.MeshPhongMaterial({ color: 0xf97316, emissive: 0x5a1a00 });
+            const chickenInFridge = new THREE.Mesh(chickenGeom, chickenMat);
+            chickenInFridge.name = "chicken";
+            chickenInFridge.position.set(0, 0.5, -0.6);
+            fridgeGroup.add(chickenInFridge);
+            
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5); dirLight.position.set(5, 8, 5); scene.add(dirLight);
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.45); scene.add(ambLight);
+            
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            
+            let isDoorOpen = false;
+            
+            container.addEventListener('click', (e) => {
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                
+                const allIntersects = raycaster.intersectObjects(fridgeGroup.children, true);
+                console.log("All intersects:", allIntersects.map(i => i.object.name || i.object.type || i.object.geometry.type));
+                
+                const doorIntersects = raycaster.intersectObjects([fridgeDoor, doorHandle], true);
+                if (doorIntersects.length > 0) {
+                    isDoorOpen = !isDoorOpen;
+                    infoText.innerHTML = isDoorOpen ? "🚪 Buzdolabı kapağı açıldı! İçerideki turuncu tavuk ürününe tıklayarak Money uyarısını görün." : "🚪 Buzdolabı kapatıldı.";
+                    infoText.style.borderColor = isDoorOpen ? "#f8b500" : "#a0b0d0";
+                    return;
+                }
+                
+                if(isDoorOpen) {
+                    const chickenIntersects = raycaster.intersectObject(chickenInFridge);
+                    console.log("Chicken intersects:", chickenIntersects.length);
+                    if (chickenIntersects.length > 0) {
+                        infoText.innerHTML = "<strong>🔔 MONEY APP BİLDİRİMİ TETİKLENDİ:</strong><br/>'Ece Hanım, 2 gün önce aldığınız Tavuk Göğsü ürününün SKT'sine 1 gün kaldı! Bugün tüketebileceğiniz <strong>Pratik Tavuk Sote</strong> tarifi için tıklayın.'";
+                        infoText.style.borderColor = "#f8b500";
+                    }
+                }
+            });
+            
+            function run() {
+                requestAnimationFrame(run);
+                
+                const targetRotation = isDoorOpen ? -Math.PI * 0.72 : 0;
+                doorHinge.rotation.y += (targetRotation - doorHinge.rotation.y) * 0.08;
+                
+                if(isDoorOpen) {
+                    const time = Date.now() * 0.005;
+                    chickenInFridge.material.emissive.setHex(0xf97316 * (0.3 + Math.abs(Math.sin(time)) * 0.5));
+                }
+                
+                renderer.render(scene, camera);
+            }
+            run();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+
+        // 5. SCENE: 3D BARKOD TARAYICI SİMÜLATÖRÜ (YENİ BÖLÜM)
+        (function() {
+            const container = document.getElementById('canvas-3d-scanner');
+            const terminal = document.getElementById('hud-terminal-output');
+            const statusBadge = document.getElementById('hud-status-badge');
+            const laser = document.getElementById('scanner-laser');
+            if(!container) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0, 6.0);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            const scannerGroup = new THREE.Group();
+            scene.add(scannerGroup);
+            
+            addDragControls(renderer.domElement, scannerGroup, 0.005);
+            
+            // Tarayıcı Standı/Tabanı
+            const standGeom = new THREE.BoxGeometry(4.0, 0.15, 2.5);
+            const standMat = new THREE.MeshPhongMaterial({ color: 0x1e293b, shininess: 50 });
+            const stand = new THREE.Mesh(standGeom, standMat);
+            stand.position.y = -1.8;
+            scannerGroup.add(stand);
+            
+            // Cam Tarayıcı Penceresi
+            const glassGeom = new THREE.BoxGeometry(1.8, 0.02, 1.2);
+            const glassMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, transparent: true, opacity: 0.4, shininess: 100 });
+            const glass = new THREE.Mesh(glassGeom, glassMat);
+            glass.position.set(0, -1.72, 0);
+            scannerGroup.add(glass);
+            
+            // Işıklandırma
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+            dirLight.position.set(5, 8, 5);
+            scene.add(dirLight);
+            
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.4);
+            scene.add(ambLight);
+            
+            // Ürün Grubu
+            const productGroup = new THREE.Group();
+            productGroup.position.y = -0.4;
+            scannerGroup.add(productGroup);
+            
+            let currentModel = null;
+            
+            // Malzemeler
+            const milkMat = new THREE.MeshPhongMaterial({ color: 0xffffff, shininess: 50 });
+            const milkCapMat = new THREE.MeshPhongMaterial({ color: 0x0ea5e9 });
+            const meatMat = new THREE.MeshPhongMaterial({ color: 0x991b1b, shininess: 30 });
+            const packagingMat = new THREE.MeshPhongMaterial({ color: 0x334155, transparent: true, opacity: 0.6, shininess: 80 });
+            
+            // Özel Wireframe Küre (Blokaj Kalkanı)
+            const shieldGeom = new THREE.SphereGeometry(1.5, 16, 16);
+            const shieldMat = new THREE.MeshBasicMaterial({ color: 0xff0000, wireframe: true, transparent: true, opacity: 0 });
+            const shield = new THREE.Mesh(shieldGeom, shieldMat);
+            productGroup.add(shield);
+            
+            // Başarı halkası efekti
+            const ringGeom = new THREE.RingGeometry(1.3, 1.35, 32);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide, transparent: true, opacity: 0 });
+            const ring = new THREE.Mesh(ringGeom, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            productGroup.add(ring);
+            
+            function createMilkModel() {
+                const group = new THREE.Group();
+                // Karton kutu gövde
+                const body = new THREE.Mesh(new THREE.BoxGeometry(1.1, 2.0, 1.1), milkMat);
+                group.add(body);
+                // Kapak
+                const cap = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.15, 16), milkCapMat);
+                cap.position.y = 1.05;
+                cap.position.x = 0.2;
+                group.add(cap);
+                // Barkod şeridi
+                const barcodeGeom = new THREE.BoxGeometry(0.7, 0.4, 1.12);
+                const barcodeMat = new THREE.MeshPhongMaterial({ color: 0x111111 });
+                const barcode = new THREE.Mesh(barcodeGeom, barcodeMat);
+                barcode.position.set(0, -0.5, 0);
+                group.add(barcode);
+                return group;
+            }
+            
+            function createMeatModel(isExpired) {
+                const group = new THREE.Group();
+                // Köpük tabak
+                const plate = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.2, 1.4), new THREE.MeshPhongMaterial({ color: isExpired ? 0x221111 : 0xf1f5f9 }));
+                plate.position.y = -0.3;
+                group.add(plate);
+                // Et
+                const meat = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.4, 1.2), isExpired ? new THREE.MeshPhongMaterial({ color: 0x451a03 }) : meatMat);
+                meat.position.y = -0.1;
+                group.add(meat);
+                // Ambalaj
+                const cover = new THREE.Mesh(new THREE.BoxGeometry(1.82, 0.42, 1.42), packagingMat);
+                group.add(cover);
+                
+                // Sarı %20 İndirim Etiketi
+                const labelGeom = new THREE.BoxGeometry(0.5, 0.01, 0.35);
+                const labelMat = new THREE.MeshPhongMaterial({ color: 0xf59e0b, emissive: 0x5a3e00 });
+                const label = new THREE.Mesh(labelGeom, labelMat);
+                label.name = "discount-label";
+                label.position.set(0.4, 0.22, 0.3);
+                label.rotation.y = 0.2;
+                label.visible = false;
+                group.add(label);
+                
+                return group;
+            }
+            
+            function showProduct(type) {
+                if (currentModel) {
+                    productGroup.remove(currentModel);
+                }
+                shield.material.opacity = 0;
+                ring.material.opacity = 0;
+                
+                if (type === 'milk') {
+                    currentModel = createMeatModel(false);
+                } else if (type === 'meat_fresh') {
+                    currentModel = createMeatModel(false);
+                } else if (type === 'meat_expired') {
+                    currentModel = createMeatModel(true);
+                }
+                productGroup.add(currentModel);
+            }
+            
+            // Başlangıç ürünü
+            showProduct('milk');
+            
+            let isScanning = false;
+            
+            window.startBarcodeScan = function(type) {
+                if (isScanning) return;
+                isScanning = true;
+                
+                showProduct(type);
+                
+                statusBadge.className = 'hud-status-badge hud-status-box info';
+                statusBadge.innerText = 'TARANIYOR...';
+                
+                terminal.innerHTML = '<div class="hud-line muted">[SİSTEM] Tarayıcı aktif. Lazer çizgisi gönderiliyor...</div>';
+                laser.classList.add('laser-active');
+                
+                setTimeout(() => {
+                    appendTerminalLine(`[SİSTEM] Nesne algılandı. Çözümleme adımı başlatıldı.`, 'muted');
+                }, 400);
+                
+                setTimeout(() => {
+                    const prodName = type === 'milk' ? 'Dana Kuşbaşı 500g (Taze)' : (type === 'meat_fresh' ? 'Dana Kıyma 500g' : 'Piliç Baget 1kg');
+                    appendTerminalLine(`[OKUYUCU] Barkod çözümlendi. GS1-128 kod tespiti başarılı.`);
+                    appendTerminalLine(`[ÜRÜN] ${prodName}`, 'warning');
+                }, 900);
+                
+                setTimeout(() => {
+                    let gtin, lot, skt;
+                    if (type === 'milk') {
+                        gtin = '8690500104812'; lot = 'L2048'; skt = '14.06.2026';
+                    } else if (type === 'meat_fresh') {
+                        gtin = '8690600492812'; lot = 'L1942'; skt = '10.06.2026';
+                    } else {
+                        gtin = '8690600492805'; lot = 'L1810'; skt = '06.06.2026';
+                    }
+                    appendTerminalLine(`[GS1-128] Çözümlenen Nitelikler:`);
+                    appendTerminalLine(`&nbsp;&nbsp;&nbsp;&nbsp;➔ GTIN (Ürün Kodu): ${gtin}`, 'muted');
+                    appendTerminalLine(`&nbsp;&nbsp;&nbsp;&nbsp;➔ LOT (Parti Kodu): ${lot}`, 'muted');
+                    appendTerminalLine(`&nbsp;&nbsp;&nbsp;&nbsp;➔ SKT (Son Kullanma): ${skt}`, 'warning');
+                }, 1500);
+                
+                setTimeout(() => {
+                    appendTerminalLine(`[M-SKT KARAR MOTORU] Sunucu veri alışverişi (Süre: 12ms)...`);
+                    appendTerminalLine(`[M-SKT KARAR MOTORU] Referans Sunucu Tarihi: 08.06.2026`);
+                }, 2100);
+                
+                setTimeout(() => {
+                    laser.classList.remove('laser-active');
+                    isScanning = false;
+                    
+                    if (type === 'milk') {
+                        appendTerminalLine(`[M-SKT] Durum: SKT'ye 6 gün var. Güvenli bölgede.`, 'success');
+                        appendTerminalLine(`[POS] Satış onaylandı. Ürün sepet fişine normal fiyattan eklendi.`, 'success');
+                        statusBadge.className = 'hud-status-badge hud-status-box success';
+                        statusBadge.innerText = 'ONAYLANDI';
+                        
+                        ring.material.color.setHex(0x34d399);
+                        ring.material.opacity = 0.9;
+                        ring.scale.set(0.1, 0.1, 0.1);
+                        
+                    } else if (type === 'meat_fresh') {
+                        appendTerminalLine(`[M-SKT] Durum: SKT'ye 2 gün kalmış! Yakın Tarih İndirim Kuralları geçerli.`, 'warning');
+                        appendTerminalLine(`[M-SKT] Otomatik %20 Dinamik İskonto uygulandı.`, 'warning');
+                        appendTerminalLine(`[POS] Fiyat güncellendi. Satış onaylandı. Tutar: 249.90 TL ➔ 199.92 TL`, 'success');
+                        statusBadge.className = 'hud-status-badge hud-status-box warning';
+                        statusBadge.innerText = '%20 İNDİRİM';
+                        
+                        const label = currentModel.getObjectByName('discount-label');
+                        if (label) label.visible = true;
+                        
+                        ring.material.color.setHex(0xf59e0b);
+                        ring.material.opacity = 0.9;
+                        ring.scale.set(0.1, 0.1, 0.1);
+                        
+                    } else if (type === 'meat_expired') {
+                        appendTerminalLine(`[M-SKT] Durum: ÜRÜNÜN SKT'Sİ GEÇMİŞ! (Tarih Farkı: -2 Gün)`, 'error');
+                        appendTerminalLine(`[M-SKT] HATA: GIDA GÜVENLİĞİ GEÇMİŞ ÜRÜN BLOKAJI TETİKLENDİ.`, 'error');
+                        appendTerminalLine(`[POS] SATIŞ BLOKE EDİLDİ! Kasiyerin ürünü sepete ekleme yetkisi kaldırılmıştır.`, 'error');
+                        statusBadge.className = 'hud-status-badge hud-status-box error';
+                        statusBadge.innerText = 'BLOKE!';
+                        
+                        shield.material.opacity = 0.7;
+                    }
+                }, 2800);
+            };
+            
+            function appendTerminalLine(text, cssClass = '') {
+                const line = document.createElement('div');
+                line.className = 'hud-line' + (cssClass ? ' ' + cssClass : '');
+                line.innerHTML = text;
+                terminal.appendChild(line);
+                terminal.scrollTop = terminal.scrollHeight;
+            }
+
+
+            
+            let clock = new THREE.Clock();
+            function run() {
+                requestAnimationFrame(run);
+                const elapsed = clock.getElapsedTime();
+                
+                if (productGroup) {
+                    productGroup.rotation.y += 0.008;
+                    productGroup.position.y = -0.4 + Math.sin(elapsed * 2.2) * 0.08;
+                }
+                
+                if (shield && shield.material.opacity > 0) {
+                    shield.material.opacity = 0.45 + Math.sin(elapsed * 7) * 0.2;
+                    shield.rotation.y -= 0.015;
+                    shield.rotation.x += 0.007;
+                }
+                
+                if (ring && ring.material.opacity > 0) {
+                    ring.scale.x += 0.05;
+                    ring.scale.y += 0.05;
+                    ring.material.opacity -= 0.02;
+                }
+                
+                renderer.render(scene, camera);
+            }
+            run();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+
+        // === KANO MODELİ BİLGİ VERİ TABANI ===
+        const kanoRequirementsData = {
+            'FR-01': {
+                id: 'FR-01',
+                name: 'FR-01: Barkod Çözümleme ve SKT Okuma',
+                category: 'MUST-BE (TEMEL GEREKSİNİM)',
+                class: 'badge-red',
+                desc: '<strong>Fonksiyonel Gereksinim:</strong> Kasada veya Sanal Market toplama uygulamasında okutulan ürünün 2D/GS1-128 barkod yapısından ürün kimliği, net gramajı ve SKT verisini otomatik olarak ayrıştırır.<br/><br/><strong>Kano Analizi:</strong> Gıda güvenliği kontrolü ve dinamik blokajın çalışabilmesi bu verinin çözümlenmesine bağlıdır. Olmazsa olmaz bir temel baraj gereksinimidir (Must-be).'
+            },
+            'FR-04': {
+                id: 'FR-04',
+                name: 'FR-04: Sanal Market SKT Seçim Ekranı',
+                category: 'PERFORMANCE (DOĞRUSAL GEREKSİNİM)',
+                class: 'badge-blue',
+                desc: '<strong>Fonksiyonel Gereksinim:</strong> Sepete taze gıda ekleyen müşterilere "En Az 5 Gün SKT Garantili" veya "%20 İndirimli 1-2 Gün SKT Fırsatı" tercihleri sunulmalıdır.<br/><br/><strong>Kano Analizi:</strong> Müşteriye tasarruf hakkı ve taze-seçim özgürlüğü tanır. Bu işlevin kalitesi arttıkça müşteri memnuniyeti doğrusal olarak yükselir (Performance).'
+            },
+            'FR-06': {
+                id: 'FR-06',
+                name: 'FR-06: Money App Hatırlatma Bildirimi',
+                category: 'DELIGHTER (ÇEKİCİ / HEYECAN VERİCİ)',
+                class: 'badge-green',
+                desc: '<strong>Fonksiyonel Gereksinim:</strong> Satın alınan kritik taze gıdaların SKT\'sine 1 gün kala Money mobil uygulaması üzerinden otomatik push tüketim bildirimi gönderir.<br/><br/><strong>Kano Analizi:</strong> Tüketicinin beklemediği ancak sunulduğunda evdeki israfı önleyip marka sadakatini zirveye taşıyan, "wow" etkisi yaratan çekici bir özelliktir (Delighter).'
+            },
+            'NFR-SPEED': {
+                id: 'NFR-SPEED',
+                name: 'NFR-01: Performans - Hız (150 ms)',
+                category: 'MUST-BE (TEMEL GEREKSİNİM)',
+                class: 'badge-red',
+                desc: '<strong>Fonksiyonel Olmayan Gereksinim:</strong> Kasa geçişlerinde gecikme yaşanmaması için barkod tarama anından doğrulama ve indirim kararının yansıma süresi <strong>150 ms</strong> altında olmalıdır.<br/><br/><strong>Kano Analizi:</strong> Hız, kasada kuyruk oluşmasını engellemek için sistemin en temel hijyen faktörüdür. Yokluğunda sistem kullanılamaz olur (Must-be).'
+            },
+            'NFR-ACC': {
+                id: 'NFR-ACC',
+                name: 'NFR-07: Doğruluk - Kesinlik (99.99%)',
+                category: 'PERFORMANCE (DOĞRUSAL GEREKSİNİM)',
+                class: 'badge-blue',
+                desc: '<strong>Fonksiyonel Olmayan Gereksinim:</strong> Barkod okuma, tarih karşılaştırma ve iskonto hesaplama motorlarının hata payı (doğruluk oranı) <strong>99.99%</strong> seviyesinde olmalıdır.<br/><br/><strong>Kano Analizi:</strong> Hatalı bloke veya yanlış indirim kararlarının sıfıra yakınlığı, sistem verimliliğini ve kullanıcı memnuniyetini doğrudan etkiler (Performance).'
+            },
+            'NFR-SEC': {
+                id: 'NFR-SEC',
+                name: 'NFR-03: Güvenlik / KVKK Entegrasyonu',
+                category: 'MUST-BE (TEMEL GEREKSİNİM)',
+                class: 'badge-red',
+                desc: '<strong>Fonksiyonel Olmayan Gereksinim:</strong> Money Kart entegrasyonu ve bildirim süreçlerinde kişisel veriler maskelenmeli ve <strong>256-bit AES</strong> şifreleme kullanılmalıdır.<br/><br/><strong>Kano Analizi:</strong> Yasal uyumluluk ve müşteri güvenliği tartışmaya kapalı bir baraj koşuludur (Must-be).'
+            }
+        };
+
+        // 4.1. SCENE: 3D KANO MODELİ SİMÜLATÖRÜ (YENİ BÖLÜM)
+        (function() {
+            const container = document.getElementById('canvas-3d-kano');
+            const detailsContent = document.getElementById('kano-details-content');
+            if(!container || !detailsContent) return;
+            
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 100);
+            camera.position.set(0, 0.15, 10.5);
+            camera.lookAt(0, 0.15, 0);
+            
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            const kanoGroup = new THREE.Group();
+            kanoGroup.scale.set(0.7, 0.7, 0.7);
+            kanoGroup.position.set(0.2, 0.3, 0);
+            scene.add(kanoGroup);
+            
+            // Kano için akıllı kontrol: merkeze yakınsa PAN, uzaksa 3D DÖNDÜRME
+            (function() {
+                let isDragging = false;
+                let dragMode = 'none'; // 'pan' veya 'rotate'
+                let prevMouse = { x: 0, y: 0 };
+                const panFactor = 0.008;
+                const rotateFactor = 0.005;
+                const CENTER_RADIUS = 60; // piksel - merkeze bu kadar yakınsa pan modu
+                
+                // Eksen merkezinin ekran koordinatını hesapla
+                function getOriginScreenPos() {
+                    const origin = new THREE.Vector3(0, 0, 0);
+                    origin.applyMatrix4(kanoGroup.matrixWorld);
+                    origin.project(camera);
+                    const rect = renderer.domElement.getBoundingClientRect();
+                    return {
+                        x: (origin.x * 0.5 + 0.5) * rect.width + rect.left,
+                        y: (-origin.y * 0.5 + 0.5) * rect.height + rect.top
+                    };
+                }
+                
+                renderer.domElement.addEventListener('mousedown', (e) => {
+                    isDragging = true;
+                    prevMouse = { x: e.clientX, y: e.clientY };
+                    
+                    // Tıklanan nokta eksenlerin merkezine yakın mı?
+                    const originScreen = getOriginScreenPos();
+                    const dist = Math.sqrt(
+                        Math.pow(e.clientX - originScreen.x, 2) + 
+                        Math.pow(e.clientY - originScreen.y, 2)
+                    );
+                    
+                    if (dist < CENTER_RADIUS) {
+                        dragMode = 'pan';
+                        renderer.domElement.style.cursor = 'move';
+                    } else {
+                        dragMode = 'rotate';
+                        renderer.domElement.style.cursor = 'grabbing';
+                    }
+                });
+                
+                renderer.domElement.addEventListener('mousemove', (e) => {
+                    if (!isDragging) {
+                        // Hover: merkeze yakınsa imleç değiştir
+                        const originScreen = getOriginScreenPos();
+                        const dist = Math.sqrt(
+                            Math.pow(e.clientX - originScreen.x, 2) + 
+                            Math.pow(e.clientY - originScreen.y, 2)
+                        );
+                        renderer.domElement.style.cursor = dist < CENTER_RADIUS ? 'move' : 'grab';
+                        return;
+                    }
+                    
+                    const dx = e.clientX - prevMouse.x;
+                    const dy = e.clientY - prevMouse.y;
+                    
+                    if (dragMode === 'pan') {
+                        kanoGroup.position.x += dx * panFactor;
+                        kanoGroup.position.y -= dy * panFactor;
+                    } else {
+                        kanoGroup.rotation.y += dx * rotateFactor;
+                        kanoGroup.rotation.x += dy * rotateFactor;
+                    }
+                    
+                    prevMouse = { x: e.clientX, y: e.clientY };
+                });
+                
+                window.addEventListener('mouseup', () => {
+                    isDragging = false;
+                    dragMode = 'none';
+                    renderer.domElement.style.cursor = 'grab';
+                });
+                
+                renderer.domElement.style.cursor = 'grab';
+                
+                // Scroll ile zoom
+                renderer.domElement.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    const zoomSpeed = 0.3;
+                    camera.position.z += e.deltaY > 0 ? zoomSpeed : -zoomSpeed;
+                    camera.position.z = Math.max(5, Math.min(18, camera.position.z));
+                }, { passive: false });
+                
+                // Mobil dokunmatik destek
+                let prevTouch = { x: 0, y: 0 };
+                let touchMode = 'none';
+                renderer.domElement.addEventListener('touchstart', (e) => {
+                    if (e.touches.length === 1) {
+                        isDragging = true;
+                        prevTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                        const originScreen = getOriginScreenPos();
+                        const dist = Math.sqrt(
+                            Math.pow(e.touches[0].clientX - originScreen.x, 2) + 
+                            Math.pow(e.touches[0].clientY - originScreen.y, 2)
+                        );
+                        touchMode = dist < CENTER_RADIUS ? 'pan' : 'rotate';
+                    }
+                });
+                renderer.domElement.addEventListener('touchmove', (e) => {
+                    if (!isDragging || e.touches.length !== 1) return;
+                    const dx = e.touches[0].clientX - prevTouch.x;
+                    const dy = e.touches[0].clientY - prevTouch.y;
+                    if (touchMode === 'pan') {
+                        kanoGroup.position.x += dx * panFactor;
+                        kanoGroup.position.y -= dy * panFactor;
+                    } else {
+                        kanoGroup.rotation.y += dx * rotateFactor;
+                        kanoGroup.rotation.x += dy * rotateFactor;
+                    }
+                    prevTouch = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+                });
+                renderer.domElement.addEventListener('touchend', () => { isDragging = false; touchMode = 'none'; });
+            })();
+            
+            // Işıklandırma
+            const dirLight = new THREE.DirectionalLight(0xffffff, 1.2);
+            dirLight.position.set(2, 5, 5);
+            scene.add(dirLight);
+            
+            const ambLight = new THREE.AmbientLight(0xffffff, 0.45);
+            scene.add(ambLight);
+            
+            // === EKSEN ÇİZGİLERİ (NET VE KALIN) ===
+            
+            // Yatay Eksen (X): EKSİK İŞLEV → TAM İŞLEV
+            const xAxisMat = new THREE.LineBasicMaterial({ color: 0x4682ff, linewidth: 2 });
+            const xAxisGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-3.2, 0, 0.01),
+                new THREE.Vector3(3.2, 0, 0.01)
+            ]);
+            kanoGroup.add(new THREE.Line(xAxisGeom, xAxisMat));
+            
+            // X ekseni ok başlığı
+            const xArrowGeom = new THREE.ConeGeometry(0.06, 0.2, 8);
+            const xArrowMat = new THREE.MeshBasicMaterial({ color: 0x4682ff });
+            const xArrow = new THREE.Mesh(xArrowGeom, xArrowMat);
+            xArrow.position.set(3.2, 0, 0.01);
+            xArrow.rotation.z = -Math.PI / 2;
+            kanoGroup.add(xArrow);
+            
+            // Dikey Eksen (Y): DÜŞÜK MEMNUNİYET → YÜKSEK MEMNUNİYET
+            const yAxisGeom = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(0, -2.5, 0.01),
+                new THREE.Vector3(0, 2.8, 0.01)
+            ]);
+            kanoGroup.add(new THREE.Line(yAxisGeom, xAxisMat));
+            
+            // Y ekseni ok başlığı
+            const yArrow = new THREE.Mesh(xArrowGeom.clone(), xArrowMat.clone());
+            yArrow.position.set(0, 2.8, 0.01);
+            kanoGroup.add(yArrow);
+            
+            // Eksen kısa çizgileri (tick marks)
+            const tickMat = new THREE.LineBasicMaterial({ color: 0x334477, linewidth: 1 });
+            for (let i = -3; i <= 3; i++) {
+                if (i === 0) continue;
+                // X ekseni tick
+                const txGeom = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(i, -0.08, 0.01), new THREE.Vector3(i, 0.08, 0.01)
+                ]);
+                kanoGroup.add(new THREE.Line(txGeom, tickMat));
+                // Y ekseni tick
+                const tyGeom = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-0.08, i, 0.01), new THREE.Vector3(0.08, i, 0.01)
+                ]);
+                kanoGroup.add(new THREE.Line(tyGeom, tickMat));
+            }
+            
+            // Hafif arka plan grid (çok soluk)
+            const gridMat = new THREE.LineBasicMaterial({ color: 0x1a2744, linewidth: 1, transparent: true, opacity: 0.3 });
+            for (let i = -3; i <= 3; i++) {
+                if (i === 0) continue;
+                const hGeom = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(-3.2, i, -0.01), new THREE.Vector3(3.2, i, -0.01)
+                ]);
+                kanoGroup.add(new THREE.Line(hGeom, gridMat));
+                const vGeom = new THREE.BufferGeometry().setFromPoints([
+                    new THREE.Vector3(i, -2.5, -0.01), new THREE.Vector3(i, 2.8, -0.01)
+                ]);
+                kanoGroup.add(new THREE.Line(vGeom, gridMat));
+            }
+            
+            // --- KANO EĞRİLERİ ÇİZİMİ (İyileştirilmiş) ---
+            
+            // 1. MUST-BE EĞRİSİ (Kırmızı) - Sol altta düz, sağa doğru yavaşça yükselir
+            const mustBePoints = [];
+            for (let x = -3.0; x <= 3.0; x += 0.05) {
+                const y = -2.0 + 1.5 * (1 - Math.exp(-0.8 * (x + 3)));
+                mustBePoints.push(new THREE.Vector3(x, Math.min(y, -0.15), 0));
+            }
+            const mustBeCurve = new THREE.CatmullRomCurve3(mustBePoints);
+            const mustBeGeom = new THREE.TubeGeometry(mustBeCurve, 100, 0.025, 12, false);
+            const mustBeMat = new THREE.MeshPhongMaterial({ color: 0xef4444, emissive: 0x550000, shininess: 60 });
+            const mustBeMesh = new THREE.Mesh(mustBeGeom, mustBeMat);
+            kanoGroup.add(mustBeMesh);
+            
+            // 2. PERFORMANCE EĞRİSİ (Mavi/Cyan) - Düz doğrusal çizgi
+            const perfPoints = [
+                new THREE.Vector3(-3.0, -2.2, 0),
+                new THREE.Vector3(-1.5, -1.1, 0),
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(1.5, 1.1, 0),
+                new THREE.Vector3(3.0, 2.2, 0)
+            ];
+            const perfCurve = new THREE.CatmullRomCurve3(perfPoints);
+            const perfGeom = new THREE.TubeGeometry(perfCurve, 50, 0.025, 12, false);
+            const perfMat = new THREE.MeshPhongMaterial({ color: 0x22d3ee, emissive: 0x003344, shininess: 60 });
+            const perfMesh = new THREE.Mesh(perfGeom, perfMat);
+            kanoGroup.add(perfMesh);
+            
+            // 3. DELIGHTER EĞRİSİ (Yeşil) - Sağda hızla yükselir
+            const delightPoints = [];
+            for (let x = -3.0; x <= 2.6; x += 0.05) {
+                const y = -0.3 + Math.exp((x - 0.5) * 0.9) * 0.18;
+                delightPoints.push(new THREE.Vector3(x, Math.min(y, 2.6), 0));
+            }
+            const delightCurve = new THREE.CatmullRomCurve3(delightPoints);
+            const delightGeom = new THREE.TubeGeometry(delightCurve, 100, 0.025, 12, false);
+            const delightMat = new THREE.MeshPhongMaterial({ color: 0x34d399, emissive: 0x004422, shininess: 60 });
+            const delightMesh = new THREE.Mesh(delightGeom, delightMat);
+            kanoGroup.add(delightMesh);
+            
+            // --- GEREKSİNİM KÜRELERİ (NET AYRILMIŞ VE ETİKETLİ) ---
+            // Must-Be eğrisi üzerinde (kırmızı)
+            // Performance eğrisi üzerinde (cyan)
+            // Delighter eğrisi üzerinde (yeşil)
+            const nodes = [
+                // Must-Be düğümleri (kırmızı eğri üzerinde, yayılmış)
+                { id: 'FR-01', label: 'FR-01\nBarkod', x: -1.8, y: -0.78, z: 0, color: 0xef4444, curve: 'must-be' }, 
+                { id: 'NFR-SPEED', label: 'NFR\nHız', x: 0.2, y: -0.40, z: 0, color: 0xef4444, curve: 'must-be' }, 
+                { id: 'NFR-SEC', label: 'NFR\nGüvenlik', x: 2.2, y: -0.22, z: 0, color: 0xef4444, curve: 'must-be' }, 
+                
+                // Performance düğümleri (cyan eğri üzerinde, yayılmış)
+                { id: 'FR-04', label: 'FR-04\nSepet', x: -0.8, y: -0.59, z: 0, color: 0x22d3ee, curve: 'perf' }, 
+                { id: 'NFR-ACC', label: 'NFR\nKesinlik', x: 1.4, y: 1.03, z: 0, color: 0x22d3ee, curve: 'perf' }, 
+                
+                // Delighter düğümü (yeşil eğri üzerinde)
+                { id: 'FR-06', label: 'FR-06\nMoney App', x: 2.0, y: 1.50, z: 0, color: 0x34d399, curve: 'delight' }
+            ];
+            
+            const nodeMeshes = [];
+            const nodeLabels = []; // HTML etiketleri için
+            
+            nodes.forEach(n => {
+                // Ana küre (daha büyük)
+                const geom = new THREE.SphereGeometry(0.10, 32, 32);
+                const mat = new THREE.MeshPhongMaterial({
+                    color: n.color,
+                    emissive: new THREE.Color(n.color).multiplyScalar(0.3),
+                    shininess: 100,
+                    specular: 0xffffff
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                mesh.position.set(n.x, n.y, n.z);
+                mesh.userData = { id: n.id, baseColor: n.color, label: n.label };
+                kanoGroup.add(mesh);
+                nodeMeshes.push(mesh);
+                
+                // Parlayan halka efekti (glow ring)
+                const ringGeom = new THREE.RingGeometry(0.14, 0.18, 32);
+                const ringMat = new THREE.MeshBasicMaterial({
+                    color: n.color,
+                    transparent: true,
+                    opacity: 0.25,
+                    side: THREE.DoubleSide
+                });
+                const ringMesh = new THREE.Mesh(ringGeom, ringMat);
+                ringMesh.position.set(n.x, n.y, n.z + 0.01);
+                kanoGroup.add(ringMesh);
+                mesh.userData.ring = ringMesh;
+                
+                // HTML etiket elemanı oluştur
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'kano-node-label';
+                labelDiv.innerHTML = n.label.replace('\n', '<br>');
+                labelDiv.style.cssText = `
+                    position: absolute; pointer-events: none; z-index: 20;
+                    font-family: 'Montserrat', sans-serif; font-size: 0.6rem; font-weight: 800;
+                    color: #fff; text-align: center; line-height: 1.2;
+                    background: rgba(0,0,0,0.7); padding: 3px 6px; border-radius: 4px;
+                    border: 1px solid rgba(${(n.color >> 16) & 255}, ${(n.color >> 8) & 255}, ${n.color & 255}, 0.6);
+                    text-shadow: 0 0 4px rgba(${(n.color >> 16) & 255}, ${(n.color >> 8) & 255}, ${n.color & 255}, 0.8);
+                    white-space: nowrap; transform: translate(-50%, -100%);
+                `;
+                container.appendChild(labelDiv);
+                nodeLabels.push({ div: labelDiv, mesh: mesh });
+            });
+            
+            // --- LEGEND (GÖSTERGE TABLOSU) ---
+            const legendDiv = document.createElement('div');
+            legendDiv.style.cssText = `
+                position: absolute; bottom: 15px; right: 15px; z-index: 20;
+                background: rgba(5, 9, 20, 0.85); border: 1px solid rgba(70, 130, 255, 0.3);
+                border-radius: 10px; padding: 10px 14px; font-family: 'Montserrat', sans-serif;
+                font-size: 0.65rem; color: #fff;
+            `;
+            legendDiv.innerHTML = `
+                <div style="font-weight:800; margin-bottom:6px; color:var(--cyan-accent); letter-spacing:0.5px;">EĞRİ TÜRLERİ</div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                    <span style="width:18px; height:3px; background:#ef4444; border-radius:2px; display:inline-block;"></span>
+                    <span style="color:#ef4444; font-weight:700;">Temel (Must-Be)</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                    <span style="width:18px; height:3px; background:#22d3ee; border-radius:2px; display:inline-block;"></span>
+                    <span style="color:#22d3ee; font-weight:700;">Performans (Linear)</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                    <span style="width:18px; height:3px; background:#34d399; border-radius:2px; display:inline-block;"></span>
+                    <span style="color:#34d399; font-weight:700;">Çekici (Delighter)</span>
+                </div>
+            `;
+            container.appendChild(legendDiv);
+            
+            // Etiket pozisyonlarını güncelleme fonksiyonu
+            function updateLabelPositions() {
+                nodeLabels.forEach(item => {
+                    const vector = new THREE.Vector3().copy(item.mesh.position);
+                    vector.y += 0.22; // Kürenin biraz üstüne yerleştir
+                    vector.applyMatrix4(kanoGroup.matrixWorld);
+                    vector.project(camera);
+                    
+                    const x = (vector.x * 0.5 + 0.5) * container.clientWidth;
+                    const y = (-vector.y * 0.5 + 0.5) * container.clientHeight;
+                    
+                    item.div.style.left = x + 'px';
+                    item.div.style.top = y + 'px';
+                    
+                    // Ekran dışındaysa gizle
+                    item.div.style.display = (vector.z > 1 || x < 0 || x > container.clientWidth || y < 0 || y > container.clientHeight) ? 'none' : 'block';
+                });
+            }
+            
+            // Raycasting
+            const raycaster = new THREE.Raycaster();
+            const mouse = new THREE.Vector2();
+            
+            container.addEventListener('click', (e) => {
+                const rect = renderer.domElement.getBoundingClientRect();
+                mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+                mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+                
+                raycaster.setFromCamera(mouse, camera);
+                const intersects = raycaster.intersectObjects(nodeMeshes);
+                
+                if (intersects.length > 0) {
+                    const target = intersects[0].object;
+                    selectKanoReq(target.userData.id, true);
+                }
+            });
+            
+            window.selectKanoReq = function(id, fromCanvas = false) {
+                nodeMeshes.forEach(m => {
+                    m.scale.set(1, 1, 1);
+                    m.material.emissive.copy(new THREE.Color(m.userData.baseColor).multiplyScalar(0.3));
+                    if (m.userData.ring) {
+                        m.userData.ring.material.opacity = 0.25;
+                        m.userData.ring.scale.set(1, 1, 1);
+                    }
+                });
+                
+                // Etiketleri normal boyuta getir
+                nodeLabels.forEach(item => {
+                    item.div.style.transform = 'translate(-50%, -100%) scale(1)';
+                    item.div.style.opacity = '0.7';
+                });
+                
+                const buttons = document.querySelectorAll('.kano-tab-btn');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                const activeBtn = document.getElementById(`btn-kano-${id}`);
+                if (activeBtn) activeBtn.classList.add('active');
+                
+                const nodeMesh = nodeMeshes.find(m => m.userData.id === id);
+                if (nodeMesh) {
+                    nodeMesh.scale.set(1.5, 1.5, 1.5);
+                    nodeMesh.material.emissive.setHex(0xffffff);
+                    if (nodeMesh.userData.ring) {
+                        nodeMesh.userData.ring.material.opacity = 0.6;
+                        nodeMesh.userData.ring.scale.set(1.3, 1.3, 1.3);
+                    }
+                    
+                    // Seçilen düğümün etiketini büyüt
+                    const activeLabel = nodeLabels.find(item => item.mesh === nodeMesh);
+                    if (activeLabel) {
+                        activeLabel.div.style.transform = 'translate(-50%, -100%) scale(1.3)';
+                        activeLabel.div.style.opacity = '1';
+                    }
+                    
+                    if(!fromCanvas) {
+                        const targetPos = new THREE.Vector3().copy(nodeMesh.position).add(new THREE.Vector3(0, 0.2, 4.0));
+                        let steps = 0;
+                        function smoothCam() {
+                            if (steps < 25) {
+                                camera.position.lerp(targetPos, 0.12);
+                                steps++;
+                                requestAnimationFrame(smoothCam);
+                            }
+                        }
+                        smoothCam();
+                    }
+                }
+                
+                const data = kanoRequirementsData[id];
+                if (data) {
+                    detailsContent.innerHTML = `
+                        <div class="kano-details-header">
+                            <span>${data.name}</span>
+                            <span class="kano-details-category ${data.class}">${data.category}</span>
+                        </div>
+                        <div class="kano-details-desc">${data.desc}</div>
+                    `;
+                }
+            };
+            
+            selectKanoReq('FR-01');
+            
+            let clock = new THREE.Clock();
+            function run() {
+                requestAnimationFrame(run);
+                const elapsed = clock.getElapsedTime();
+                
+                nodeMeshes.forEach(m => {
+                    const breathe = 1.0 + Math.sin(elapsed * 2.5 + m.position.x * 2.0) * 0.05;
+                    const activeElement = document.querySelector('.kano-tab-btn.active');
+                    const activeId = activeElement ? activeElement.id.replace('btn-kano-', '') : 'FR-01';
+                    const baseScale = m.userData.id === activeId ? 1.5 : 1.0;
+                    m.scale.set(baseScale * breathe, baseScale * breathe, baseScale * breathe);
+                    
+                    // Halka animasyonu
+                    if (m.userData.ring) {
+                        const ringBreathe = 1.0 + Math.sin(elapsed * 2.0 + m.position.x) * 0.1;
+                        const ringBase = m.userData.id === activeId ? 1.3 : 1.0;
+                        m.userData.ring.scale.set(ringBase * ringBreathe, ringBase * ringBreathe, 1);
+                    }
+                });
+                
+                // Çok hafif döndürme
+                kanoGroup.rotation.y = Math.sin(elapsed * 0.06) * 0.05;
+                
+                // Etiket pozisyonlarını güncelle
+                updateLabelPositions();
+                
+                renderer.render(scene, camera);
+            }
+            run();
+            
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        })();
+    </script>
+</body>
+</html>

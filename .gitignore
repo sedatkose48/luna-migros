@@ -1,0 +1,26 @@
+## .NET / ASP.NET Core
+bin/
+obj/
+*.user
+*.suo
+.vs/
+*.csproj.user
+publish/
+*.pubxml
+*.pubxml.user
+
+## Logs
+*.log
+logs/
+
+## Node
+node_modules/
+
+## OS
+.DS_Store
+Thumbs.db
+
+## Secrets
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json

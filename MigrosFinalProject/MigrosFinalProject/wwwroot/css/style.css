@@ -1,0 +1,138 @@
+﻿.luna-us-card {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(145deg, rgba(15,23,42,0.8), rgba(2,6,23,0.9));
+    border: 1px solid rgba(148,163,184,0.2);
+    border-radius: 24px;
+    padding: 2rem;
+    color: #f8fafc;
+    max-width: 800px;
+    margin: 2rem auto;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+}
+
+.us-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    padding-bottom: 1rem;
+}
+
+.us-badge {
+    background: rgba(34,211,238,0.1);
+    color: #22d3ee;
+    border: 1px solid rgba(34,211,238,0.3);
+    padding: 0.4rem 0.8rem;
+    border-radius: 999px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+}
+
+.us-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+}
+
+.us-story-block {
+    background: rgba(255,255,255,0.03);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.story-line {
+    margin-bottom: 0.8rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
+}
+
+.story-role {
+    color: #f472b6;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.story-action {
+    color: #22d3ee;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.story-value {
+    color: #34d399;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    margin-bottom: 1rem;
+    font-weight: 600;
+}
+
+.invest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 0.8rem;
+    margin-bottom: 2rem;
+}
+
+.invest-item {
+    background: rgba(167,139,250,0.1);
+    border: 1px solid rgba(167,139,250,0.2);
+    padding: 0.8rem;
+    border-radius: 12px;
+    text-align: center;
+}
+
+    .invest-item b {
+        display: block;
+        color: #a78bfa;
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.2rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .invest-item span {
+        font-size: 0.75rem;
+        color: #cbd5e1;
+    }
+
+.gherkin-block {
+    background: rgba(0,0,0,0.3);
+    border-left: 3px solid #60a5fa;
+    padding: 1rem 1.5rem;
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+}
+
+.gherkin-title {
+    font-weight: 700;
+    color: #e2e8f0;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.g-given {
+    color: #fbbf24;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.g-when {
+    color: #60a5fa;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.g-then {
+    color: #34d399;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}

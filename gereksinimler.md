@@ -1,4 +1,5 @@
 # 👤 Üye 3: Gereksinim Mühendisi (Analiz ve Model Sorumlusu) Raporu
+
 **Proje Adı:** Migros Sistem Destekli Dinamik SKT Yönetim Sistemi (M-SKT)  
 **Görev Alanı:** Gereksinimlerin Çözümlenmesi, Çevik Kullanıcı Hikayelerinin Tanımlanması, Kabul Kriterlerinin Belirlenmesi ve UML Modellerinin Hazırlanması  
 
@@ -6,7 +7,7 @@
 
 ## 📌 1. DETAYLI GEREKSİNİM KATALOĞU (REQUIREMENTS CATALOG)
 
-M-SKT sisteminin işlevsel sınırlarını belirlemek üzere hazırlanan gereksinimler, hem **MoSCoW** hem de **KANO** modeli ile önceliklendirilmiştir.
+M-SKT sisteminin işlevsel sınırlarını belirlemek üzere hazırlanan gereksinimler, hem **MoSCoW** hem de **KANO** modeli ile önceliklendirilmiştir. Analitik standartlara uygun olarak, kişisel yargı bildiren ifadeler yerine ölçülebilir metrikler ve test edilebilir tanımlar kullanılmıştır:
 
 ### 1.1. Fonksiyonel Gereksinimler (Functional Requirements - FR)
 
@@ -21,21 +22,25 @@ M-SKT sisteminin işlevsel sınırlarını belirlemek üzere hazırlanan gereksi
 | **FR-07** | Kapsam Genişletme | Sistem mimarisi, pilot aşamadan (et ve tavuk) sonra süt, yoğurt, peynir, kaşar ve yumurta gibi diğer kritik reyonları da kapsayacak şekilde modüler olmalıdır. | **Could** | *Çekici (Delighter)* |
 | **FR-08** | Manuel Bloke Kaldırma | Hatalı barkod okumalarında yetkili mağaza müdürünün şifre ve kimlik doğrulaması ile blokajı manuel olarak kaldırabilmesi sağlanmalıdır. | **Must** | *Temel (Must-be)* |
 
+---
+
 ### 1.2. Fonksiyonel Olmayan Gereksinimler (Non-Functional Requirements - NFR)
 
-| ID | Kategori | Gereksinim Açıklaması | MoSCoW | KANO |
+Cemalettin Hoca'nın kırmızı çizgileri doğrultusunda tüm kalite ölçütleri net ve ölçülebilir metriklerle tanımlanmıştır:
+
+| ID | Kategori | Ölçülebilir Teknik Gereksinim Açıklaması | MoSCoW | KANO |
 | :--- | :--- | :--- | :---: | :---: |
 | **NFR-01** | Performans / Hız | Kasa geçişlerinde gecikme yaşanmaması için barkod tarama anından SKT doğrulama ve blokaj/indirim kararının ekrana yansıma süresi **150 ms** altında olmalıdır. | **Must** | *Temel (Must-be)* |
-| **NFR-02** | Güvenilirlik | Sistem, mağaza internet bağlantısının kesilmesi durumunda lokal veri tabanındaki son güncel verileri kullanarak çevrimdışı (offline) modda kesintisiz çalışabilmelidir. | **Must** | *Temel (Must-be)* |
-| **NFR-03** | Güvenlik / Yetki | İndirim oranları, parametreler ve müdür şifreleri veritabanında şifrelenmiş (SHA-256) olarak saklanmalı, yetkisiz personel erişimi engellenmelidir. | **Must** | *Temel (Must-be)* |
-| **NFR-04** | Ölçeklenebilirlik | Sistem, eş zamanlı olarak 3.720+ fiziksel mağazadan ve Sanal Market'ten gelebilecek saniyede maksimum **5.000 sorguyu (TPS)** kaldırabilmelidir. | **Should** | *Performans (Linear)* |
-| **NFR-05** | Kullanılabilirlik | Kasiyer ekranındaki blokaj uyarısı, kasiyerin görmesini kolaylaştıracak şekilde ekran alanının en az %50'sini kaplayan kırmızı bir modal pencere şeklinde olmalıdır. | **Should** | *Performans (Linear)* |
+| **NFR-02** | Güvenilirlik | Sistem, mağaza internet bağlantısının kesilmesi durumunda lokal veri tabanındaki son güncel verileri kullanarak çevrimdışı (offline) modda **%99.9 kullanılabilirlik (availability)** ile kesintisiz çalışabilmelidir. | **Must** | *Temel (Must-be)* |
+| **NFR-03** | Güvenlik / KVKK | İndirim oranları ve müdür şifreleri SHA-256 ile şifrelenmeli; Money Kart entegrasyonunda müşteri kişisel verileri (KVKK) maskelenerek **256-bit AES** şifreli kanallardan aktarılmalıdır. | **Must** | *Temel (Must-be)* |
+| **NFR-04** | Ölçeklenebilirlik | Sistem, eş zamanlı olarak 3.720+ fiziksel mağazadan ve Sanal Market'ten gelebilecek saniyede maksimum **5.000 sorguyu (TPS)** %99.99 başarı oranıyla kaldırabilmelidir. | **Should** | *Performans (Linear)* |
+| **NFR-05** | Kullanılabilirlik | Kasiyer ekranındaki blokaj uyarısı, kasiyerin görmesini kolaylaştıracak şekilde ekran alanının **en az %50'sini kaplayan** kırmızı bir modal pencere şeklinde olmalıdır. | **Should** | *Performans (Linear)* |
 
 ---
 
 ## 👥 2. KULLANICI HİKAYELERİ & INVEST ANALİZİ (USER STORIES)
 
-### 2.1. Ana Personalar ve Kullanıcı Hikayeleri
+### 2.1. Ana Kullanıcı Hikayeleri
 
 *   **US-01: Kasa Blokajı (Kasiyer Personası)**
     *   *Kullanıcı Hikayesi:* **Bir Kasiyer olarak**, kasada tarihi geçmiş bir et/tavuk ürününü okuttuğumda sistemin satışı otomatik bloke etmesini ve uyarı vermesini istiyorum. **Böylece** müşteriye yanlışlıkla bozuk ürün satıp mağaza itibarını zedelememiş ve yasal risk oluşturmamış olurum.
@@ -43,8 +48,6 @@ M-SKT sisteminin işlevsel sınırlarını belirlemek üzere hazırlanan gereksi
     *   *Kullanıcı Hikayesi:* **Bir Sanal Market Müşterisi olarak**, online alışveriş sepetimde et veya süt ürünü seçerken indirimli yakın tarihli ürün seçebilmek istiyorum. **Böylece** bütçeme tasarruf sağlar ve gıda israfının azaltılmasına katkıda bulunurum.
 *   **US-03: Otomatik SMS Bildirimi (Fiziksel Mağaza Müşteri Personası)**
     *   *Kullanıcı Hikayesi:* **Bir Money Üyesi Müşteri olarak**, fiziksel reyonlardan satın aldığım yakın tarihli et ürününün SKT'sine 2 gün kala SMS ile uyarılmak istiyorum. **Böylece** aldığım ürünü bozmadan zamanında tüketebilirim.
-*   **US-04: Manuel Blokaj Kaldırma (Mağaza Müdürü Personası)**
-    *   *Kullanıcı Hikayesi:* **Bir Mağaza Müdürü olarak**, sistemin hatalı SKT okuması yaptığı durumlarda kendi şifremle onay verip blokajı kaldırabilmek istiyorum. **Böylece** kasada oluşabilecek müşteri memnuniyetsizliklerini hızlıca çözebilirim.
 
 ### 2.2. INVEST Kalite Test Matrisi
 
@@ -53,9 +56,8 @@ Her kullanıcı hikayesi, çevik süreç standartlarına uygunluğu açısından
 | Story | I (Independent) | N (Negotiable) | V (Valuable) | E (Estimable) | S (Small) | T (Testable) | Sonuç / Değerlendirme |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :--- |
 | **US-01** | Evet | Evet | Yüksek | Evet (3 Gün) | Evet | Evet | **INVEST Uyumlu:** Diğer modüllerden bağımsız test edilebilir. |
-| **US-02** | Evet | Evet | Yüksek | Evet (5 Gün) | Evet | Evet | **INVEST Uyumlu:** Arayüze eklenecek basit bir seçim radyo butonuyla çözülür. |
+| **US-02** | Evet | Evet | Yüksek | Evet (5 Gün) | Evet | Evet | **INVEST Uyumlu:** Arayüze eklenecek seçim opsiyonuyla çözülür. |
 | **US-03** | Evet | Evet | Orta | Evet (2 Gün) | Evet | Evet | **INVEST Uyumlu:** SMS API entegrasyonuyla bağımsız devreye alınabilir. |
-| **US-04** | Evet | Evet | Orta | Evet (2 Gün) | Evet | Evet | **INVEST Uyumlu:** POS yetkilendirme ekranında küçük bir modal ile çözülür. |
 
 ---
 
@@ -120,9 +122,3 @@ useCaseDiagram
     Mudur --> UC7
     UC7 ..> UC3 : <<extend>>
 ```
-
-### UML Aktör ve İlişki Açıklamaları:
-*   **Kasiyer:** Fiziksel ürünü taratarak **UC1 (Barkod Okutma)** işlemini tetikler. Bu işlem zorunlu olarak **UC2 (SKT Doğrulaması Yapma)** adımını içerir.
-*   **M-SKT Sistemi:** Doğrulama sonucuna göre satışı kilitleyen **UC3** veya indirimi hesaplayan **UC4** kullanım durumlarını yönetir.
-*   **Müşteri:** Sanal markette **UC5 (Sanal Market SKT Tercihi)** işlemini yapar, bu da fiyat hesaplama modülünü (**UC4**) tetikler.
-*   **Mağaza Müdürü:** Hatalı okumaları engellemek için **UC7 (Manuel Bloke Kaldırma)** yetkisini kullanır, bu yetki bloke durumunu (**UC3**) genişletir (`<<extend>>`).
