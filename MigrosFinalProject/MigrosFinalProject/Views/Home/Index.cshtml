@@ -2650,34 +2650,26 @@
                 laser.classList.add('laser-active');
                 
                 setTimeout(() => {
-                    appendTerminalLine(`[SİSTEM] Nesne algılandı. Çözümleme adımı başlatıldı.`, 'muted');
+                    appendTerminalLine(`[SİSTEM] Ürün algılandı. Kontrol başlatıldı.`, 'muted');
                 }, 400);
                 
                 setTimeout(() => {
                     const prodName = type === 'milk' ? 'Dana Kuşbaşı 500g (Taze)' : (type === 'meat_fresh' ? 'Dana Kıyma 500g' : 'Piliç Baget 1kg');
-                    appendTerminalLine(`[OKUYUCU] Barkod çözümlendi. GS1-128 kod tespiti başarılı.`);
                     appendTerminalLine(`[ÜRÜN] ${prodName}`, 'warning');
                 }, 900);
                 
                 setTimeout(() => {
-                    let gtin, lot, skt;
+                    let skt;
                     if (type === 'milk') {
-                        gtin = '8690500104812'; lot = 'L2048'; skt = '14.06.2026';
+                        skt = '14.06.2026';
                     } else if (type === 'meat_fresh') {
-                        gtin = '8690600492812'; lot = 'L1942'; skt = '10.06.2026';
+                        skt = '10.06.2026';
                     } else {
-                        gtin = '8690600492805'; lot = 'L1810'; skt = '06.06.2026';
+                        skt = '06.06.2026';
                     }
-                    appendTerminalLine(`[GS1-128] Çözümlenen Nitelikler:`);
-                    appendTerminalLine(`&nbsp;&nbsp;&nbsp;&nbsp;➔ GTIN (Ürün Kodu): ${gtin}`, 'muted');
-                    appendTerminalLine(`&nbsp;&nbsp;&nbsp;&nbsp;➔ LOT (Parti Kodu): ${lot}`, 'muted');
-                    appendTerminalLine(`&nbsp;&nbsp;&nbsp;&nbsp;➔ SKT (Son Kullanma): ${skt}`, 'warning');
+                    appendTerminalLine(`[M-SKT] Son Kullanma Tarihi: ${skt}`, 'warning');
+                    appendTerminalLine(`[M-SKT] Sistem kontrolü yapılıyor...`, 'muted');
                 }, 1500);
-                
-                setTimeout(() => {
-                    appendTerminalLine(`[M-SKT KARAR MOTORU] Sunucu veri alışverişi (Süre: 12ms)...`);
-                    appendTerminalLine(`[M-SKT KARAR MOTORU] Referans Sunucu Tarihi: 08.06.2026`);
-                }, 2100);
                 
                 setTimeout(() => {
                     laser.classList.remove('laser-active');
