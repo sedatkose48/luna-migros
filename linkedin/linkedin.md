@@ -1,4 +1,4 @@
-# 🔗 LUNA Projesi LinkedIn Paylaşım Metni
+# LUNA Projesi LinkedIn Paylaşım Metni
 
 LUNA ekibi (Eyüp Tonkaz, Mehmet Başan, Recep Furkan Mutlu ve siz) ile Migros için geliştirdiğiniz Dinamik SKT Yönetim Sistemi (M-SKT) projesini LinkedIn'de paylaşmak için hazırlanan teknik içerikli metin aşağıdadır:
 
