@@ -69,11 +69,48 @@ Bu karakterler üzerinden hazırladığımız **Empati Haritaları**, bize çal�
 
 ## 7. GEREKSİNİM MÜHENDİSLİĞİ VE KANO MODELİ ANALİZİ
 
-Belirlediğimiz sistem gereksinimlerini yazılım mühendisliği standartlarına göre **Fonksiyonel (FR)** ve **Fonksiyonel Olmayan (NFR)** olarak ikiye ayırdık ve bunları **Kano Modeli** analiziyle önceliklendirdik:
+### 7.1. Kano Modeli Bölüm Girişi
+"Çözümümüzü tasarlarken yalnızca sistemin neler yapacağını belirlemekle yetinmedik. Aynı zamanda bu özelliklerin müşteri memnuniyetini nasıl etkilediğini de analiz ettik.
 
-*   **Must-Be (Temel / Olmazsa Olmaz) Sınıfı:** **FR-01 (Barkod Okuma ve Sorgulama)** ve **FR-04 (Kasa Engelleme ve Kilit)** gereksinimlerini bu sınıfa dahil ettik. Kasanın ürünü tanıması ve tarihi geçmişse satışı engellemesi sistemin temel varoluş sebebidir.
-*   **Performance (Performans) Sınıfı:** **NFR-Hız (Sorgu süresinin 1 saniyenin altında olması)** ve **NFR-Güvenlik (Veri doğruluğu)** bu sınıftadır. Kasa işlem hızı ne kadar yüksek olursa, müşteri memnuniyeti ve operasyon verimliliği doğrusal olarak o kadar artacaktır.
-*   **Attractive (Heyecan Verici / WOW) Sınıfı:** **FR-06 (Money App üzerinden akıllı SKT bildirimi)** ve yaklaşan tarihlere otomatik indirim tanımlanması bu sınıftadır. Müşterinin beklemediği bu proaktif yaklaşım, müşteri sadakatini artıran esas değer teklifimizdir.
+Bu amaçla Kano Modeli kullandık.
+
+Kano modeli bize bir özelliğin ne kadar önemli olduğunu değil, müşteri memnuniyetini nasıl etkilediğini gösteriyor.
+
+Bazı özellikler müşterinin zaten beklediği temel gereksinimlerdir. Bazıları memnuniyeti performansla birlikte artırır. Bazıları ise müşteri tarafından beklenmez ancak sunulduğunda yüksek memnuniyet yaratır.
+
+Bu nedenle çözümümüzdeki özellikleri Temel Özellikler, Performans Özellikleri, Heyecan Verici Özellikler ve Etkisiz Özellikler olarak değerlendirdik."
+
+### 7.2. Heyecan Verici Özellikler (Attractive/Delighter)
+*   **Money App Hatırlatma Bildirimi (FR-06):**
+    "İlk olarak heyecan verici özellikler kategorisinde Money uygulaması üzerinden gönderilen SKT hatırlatma bildirimleri yer alıyor.
+    
+    Buradaki mantık şu: Bir müşteri marketten tavuk veya et ürünü satın aldığında normal şartlarda marketten daha sonra herhangi bir takip hizmeti beklemez. Yani müşterinin zihninde 'Marketten tavuk aldım, birkaç gün sonra bana ürünün son kullanma tarihini hatırlatsın' şeklinde bir beklenti bulunmuyor.
+    
+    Ancak sistem müşteriye örneğin; '3 gün önce satın aldığınız tavuk ürününün son kullanma tarihine 1 gün kaldı' şeklinde bir bildirim gönderdiğinde müşteri bunun kendisi için ekstra bir hizmet olduğunu düşünüyor. Bu özellik olmadığında müşteri şikayet etmez çünkü zaten böyle bir beklentisi yoktur. Ancak sunulduğunda markaya karşı güven, şeffaflık ve müşteri odaklılık algısı önemli ölçüde artar. Bu nedenle Money uygulaması üzerinden yapılan SKT bildirimini heyecan verici özellik olarak değerlendirdik."
+
+### 7.3. Performans Özellikleri (Linear/Performance)
+*   **Sanal Market Seçim Ekranı (FR-04):**
+    "Performans özellikleri kategorisinde ilk olarak Sanal Market seçim ekranı yer alıyor. Sanal marketten alışveriş yaparken müşteriye iki seçenek sunuyoruz. Birincisi normal fiyattan standart SKT'li ürün satın almak. İkincisi ise SKT'si yaklaşmış ürünü indirimli satın almak.
+    
+    Burada müşteri ne kadar çok indirimli ürün seçeneği görürse ve bu indirim oranı ne kadar tatmin edici olursa memnuniyet düzeyi de o kadar artıyor. Dolayısıyla buradaki memnuniyet sunulan performans ve seçenek kalitesiyle doğrusal bir ilişki gösteriyor. Bu nedenle bunu Performans Özelliği olarak değerlendirdik."
+*   **Performans - Hız (NFR-SPEED / NFR-01):**
+    "Performans kategorisindeki ikinci unsur sistem hızı. Kasada barkod okutulduğunda SKT kontrolünün gerçekleşmesi gerekiyor. Ancak bu kontrol işlemi kasayı yavaşlatırsa müşteri deneyimi olumsuz etkilenir. Örneğin sistem her ürün için birkaç saniye bekletiyorsa müşteri memnuniyeti düşecektir.
+    
+    Ancak kontrol işlemi neredeyse anlık gerçekleşiyorsa (150 ms altında), müşteri hem güvenlikten hem de hızdan aynı anda faydalanacaktır. Burada memnuniyet seviyesi performans seviyesiyle doğrudan ilişkilidir. Sistem ne kadar hızlı çalışırsa müşteri memnuniyeti de o kadar yükselir. Bu nedenle hız kriterini Performans Özelliği olarak değerlendirdik."
+
+### 7.4. Temel Özellikler (Must-Be/Threshold)
+*   **Barkod Çözümleme (FR-01):**
+    "Temel özellikler kısmında ilk olarak barkod çözümleme yer alıyor. Aslında bu özellik müşterinin fark ettiği bir özellik değil. Müşteri kasada ürün satın alırken sistemin barkodu okuyup okuyamadığını düşünmez. Bunu zaten çalışması gereken bir altyapı olarak kabul eder.
+    
+    Ancak barkod okunmazsa veya sistem SKT bilgisini çekemezse bütün çözüm çalışamaz hale gelir. Dolayısıyla bu özellik müşteriyi mutlu etmez ama eksik olması ciddi memnuniyetsizlik yaratır. Bu nedenle Temel Özellik kategorisindedir."
+*   **Doğruluk ve Kesinlik (NFR-ACC / NFR-07):**
+    "Temel özelliklerimizin ikincisi doğruluk ve kesinliktir. Kasa barkod okuma ve karar motorunun hata payı minimum düzeyde (%99.99 doğruluk oranıyla) olmalıdır. Müşteri kasadan geçerken yanlış bloke kararlarıyla veya yanlış indirim hesaplamalarıyla karşılaşmamalıdır. Bu durum gıda güvenliği zincirini bozacağı gibi mağaza önünde kuyruklara ve güven kaybına yol açar. Müşteri bu doğruluğu normalde övmez, bunu zaten olması gereken temel bir standart olarak görür. Ancak en ufak bir hata büyük bir memnuniyetsizlik yaratacağı için doğruluk ve kesinlik kriterini Temel Özellik olarak sınıflandırdık."
+*   **Güvenlik / KVKK (NFR-SEC / NFR-03):**
+    "Temel özelliklerimizin üçüncüsü ise Güvenlik ve KVKK uyumluluğudur. Money Kart entegrasyonu ve müşteri son tüketim tarihi bilgileri kişisel veri kapsamındadır. Bu verilerin transferi ve depolanması tamamen şifreli kanallar üzerinden, KVKK standartlarına uygun olarak yapılmalıdır. Müşteri alışveriş yaparken verilerinin güvenliğini düşünmez, bunu sistemin zaten sağlamasını bekler. Ancak herhangi bir veri ihlali veya güvenlik açığı geri dönülemez bir memnuniyetsizliğe yol açar. Bu nedenle güvenlik ve veri korumayı Temel Özellik kategorisinde değerlendirdik."
+
+### 7.5. Etkisiz Özellikler (Indifferent)
+*   **SKT Verilerinin Analiz Amaçlı Depolanması (INF-01):**
+    "Son olarak, Etkisiz özellikler kategorisinde SKT verilerinin analiz amaçlı depolanması yer alıyor. Sistem arka planında, satılan ve imha edilen ürünlerin son kullanma tarihi verilerini ileride stok tahmini ve talep yönetimi yapabilmek amacıyla depoluyoruz. Bu veri depolama ve analiz işlemi, müşterinin doğrudan tecrübe ettiği bir özellik değildir. Bu özelliğin varlığı müşteriyi ekstra mutlu etmeyeceği gibi, yokluğu da müşteri tarafında herhangi bir memnuniyetsizlik yaratmaz. Bu nedenle bu özelliği Kano modelinde Etkisiz Özellik olarak sınıflandırdık."
 
 ---
 

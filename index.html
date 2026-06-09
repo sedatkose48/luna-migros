@@ -1153,33 +1153,39 @@
                             <tbody>
                                 <tr>
                                     <td>FR-01</td>
-                                    <td>2D barkoddan SKT, gramaj ve kimlik çözümlenmelidir.</td>
-                                    <td><span class="label-pill must">MUST</span></td>
-                                    <td>Temel (Must-be)</td>
-                                </tr>
-                                <tr>
-                                    <td>FR-02</td>
-                                    <td>Kasada SKT geçmiş ürüne otomatik bloke konulmalıdır.</td>
-                                    <td><span class="label-pill must">MUST</span></td>
-                                    <td>Temel (Must-be)</td>
-                                </tr>
-                                <tr>
-                                    <td>NFR-01</td>
-                                    <td>Barkod tarama ve karar yansıma süresi <strong>150 ms</strong> altında olmalıdır.</td>
-                                    <td><span class="label-pill must">MUST</span></td>
-                                    <td>Temel (Must-be)</td>
-                                </tr>
-                                <tr>
-                                    <td>NFR-02</td>
-                                    <td>Sistem offline modda <strong>%99.9 kullanılabilirlik</strong> ile kesintisiz çalışabilmelidir.</td>
+                                    <td>Barkod Çözümleme (SKT, gramaj ve kimlik çözümlenmesi).</td>
                                     <td><span class="label-pill must">MUST</span></td>
                                     <td>Temel (Must-be)</td>
                                 </tr>
                                 <tr>
                                     <td>NFR-03</td>
-                                    <td>Müşteri Money verileri <strong>256-bit AES</strong> ile şifreli kanallardan aktarılmalıdır.</td>
+                                    <td>Güvenlik / KVKK (256-bit AES şifreli aktarım).</td>
                                     <td><span class="label-pill must">MUST</span></td>
                                     <td>Temel (Must-be)</td>
+                                </tr>
+                                <tr>
+                                    <td>NFR-07</td>
+                                    <td>Doğruluk - Kesinlik (%99.99 karar motoru doğruluğu).</td>
+                                    <td><span class="label-pill must">MUST</span></td>
+                                    <td>Temel (Must-be)</td>
+                                </tr>
+                                <tr>
+                                    <td>FR-04</td>
+                                    <td>Sanal Market Seçim Ekranı (Taze veya yakın tarih seçimi).</td>
+                                    <td><span class="label-pill must">MUST</span></td>
+                                    <td>Performans (Linear)</td>
+                                </tr>
+                                <tr>
+                                    <td>NFR-01</td>
+                                    <td>Performans - Hız (150 ms altında doğrulama ve karar süresi).</td>
+                                    <td><span class="label-pill must">MUST</span></td>
+                                    <td>Performans (Linear)</td>
+                                </tr>
+                                <tr>
+                                    <td>INF-01</td>
+                                    <td>SKT Verilerinin Analiz Amaçlı Depolanması.</td>
+                                    <td><span class="label-pill should">SHOULD</span></td>
+                                    <td>Etkisiz (Indifferent)</td>
                                 </tr>
                             </tbody>
                         </table>

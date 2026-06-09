@@ -16,11 +16,12 @@ M-SKT sisteminin işlevsel sınırlarını belirlemek üzere hazırlanan gereksi
 | **FR-01** | Barkod Çözümleme | Sistem, et ve tavuk reyonlarında paketlere basılan özel barkodlardan (örn: GS1-128 veya DataMatrix) ürün kimliğini, net gramajını ve Son Kullanma Tarihini (SKT) ayrıştırarak okuyabilmelidir. | **Must** | *Temel (Must-be)* |
 | **FR-02** | Kasa Satış Blokajı | Kasada okutulan ürünün SKT'si o anki sistem tarihinden küçük veya eşitse, sistem satışı bloke etmeli, kasiyer ekranında kırmızı alarm göstermeli ve satışı engellemelidir. | **Must** | *Temel (Must-be)* |
 | **FR-03** | Dinamik İndirim | Taranan ürünün SKT'sine 1 veya 2 gün kalmışsa, sistem kasa ekranında uyarı vermeli ve ürün fiyatına otomatik olarak %20 indirim yansıtmalıdır. | **Must** | *Performans (Linear)* |
-| **FR-04** | Fiş Bilgilendirmesi | Satış tamamlandığında, yazıcıdan basılan fişin altındaki özel bilgi alanında "Satın aldığınız X ürününün SKT'sine Y gün kalmıştır." uyarısı yazdırılmalıdır. | **Should** | *Çekici (Delighter)* |
-| **FR-05** | SMS Bildirim Tetikleyici | Müşteri Money kartı kullandığında, satın alınan yakın tarihli ürünlerin SKT uyarısı (örn: "2 gün kaldı, tüketmeniz önerilir") otomatik olarak SMS sunucusuna iletilmelidir. | **Should** | *Çekici (Delighter)* |
-| **FR-06** | Sanal Market Seçimi | Sanal Market web/mobil uygulamasında sepet adımında, kritik ürünler için müşteriye "En Az 5 Gün SKT Garantili" veya "%20 İndirimli 1-2 Gün SKT Fırsatı" seçenekleri sunulmalıdır. | **Must** | *Performans (Linear)* |
+| **FR-04** | Sanal Market Seçimi | Sanal Market web/mobil uygulamasında sepet adımında, kritik ürünler için müşteriye "En Az 5 Gün SKT Garantili" veya "%20 İndirimli 1-2 Gün SKT Fırsatı" (seçim ekranı) sunulmalıdır. | **Must** | *Performans (Linear)* |
+| **FR-05** | Fiş ve SMS Bildirimi | Yakın tarihli ürün alındığında fişe bilgi yazdırılmalı ve Money üyesi müşterinin telefonuna tetiklenen SMS/bildirim uyarıları gönderilmelidir. | **Should** | *Çekici (Delighter)* |
+| **FR-06** | Money App Bildirimi | Satın alınan taze gıdaların son tüketim tarihine 1 gün kala Money mobil uygulaması üzerinden hatırlatma ve akıllı bildirimler gönderilmelidir. | **Should** | *Çekici (Delighter)* |
 | **FR-07** | Kapsam Genişletme | Sistem mimarisi, pilot aşamadan (et ve tavuk) sonra süt, yoğurt, peynir, kaşar ve yumurta gibi diğer kritik reyonları da kapsayacak şekilde modüler olmalıdır. | **Could** | *Çekici (Delighter)* |
-| **FR-08** | Manuel Bloke Kaldırma | Hatalı barkod okumalarında yetkili mağaza müdürünün şifre ve kimlik doğrulaması ile blokajı manuel olarak kaldırabilmesi sağlanmalıdır. | **Must** | *Temel (Must-be)* |
+| **FR-08** | Manuel Bloke Kaldırma | Hatalı barkod okuma durumlarında yetkili mağaza müdürünün şifre ve kimlik doğrulaması ile blokajı manuel olarak kaldırabilmesi sağlanmalıdır. | **Must** | *Temel (Must-be)* |
+| **INF-01** | Analiz Veritabanı | Tarihi geçmiş veya yakın tarihli ürün satış verileri, gelecekte stok tahmini yapmak amacıyla veritabanında depolanmalıdır. | **Should** | *Etkisiz (Indifferent)* |
 
 ---
 
@@ -30,11 +31,12 @@ Cemalettin Hoca'nın kırmızı çizgileri doğrultusunda tüm kalite ölçütle
 
 | ID | Kategori | Ölçülebilir Teknik Gereksinim Açıklaması | MoSCoW | KANO |
 | :--- | :--- | :--- | :---: | :---: |
-| **NFR-01** | Performans / Hız | Kasa geçişlerinde gecikme yaşanmaması için barkod tarama anından SKT doğrulama ve blokaj/indirim kararının ekrana yansıma süresi **150 ms** altında olmalıdır. | **Must** | *Temel (Must-be)* |
+| **NFR-01** | Performans / Hız | Kasa geçişlerinde gecikme yaşanmaması için barkod tarama anından SKT doğrulama ve blokaj/indirim kararının ekrana yansıma süresi **150 ms** altında olmalıdır. | **Must** | *Performans (Linear)* |
 | **NFR-02** | Güvenilirlik | Sistem, mağaza internet bağlantısının kesilmesi durumunda lokal veri tabanındaki son güncel verileri kullanarak çevrimdışı (offline) modda **%99.9 kullanılabilirlik (availability)** ile kesintisiz çalışabilmelidir. | **Must** | *Temel (Must-be)* |
 | **NFR-03** | Güvenlik / KVKK | İndirim oranları ve müdür şifreleri SHA-256 ile şifrelenmeli; Money Kart entegrasyonunda müşteri kişisel verileri (KVKK) maskelenerek **256-bit AES** şifreli kanallardan aktarılmalıdır. | **Must** | *Temel (Must-be)* |
 | **NFR-04** | Ölçeklenebilirlik | Sistem, eş zamanlı olarak 3.720+ fiziksel mağazadan ve Sanal Market'ten gelebilecek saniyede maksimum **5.000 sorguyu (TPS)** %99.99 başarı oranıyla kaldırabilmelidir. | **Should** | *Performans (Linear)* |
 | **NFR-05** | Kullanılabilirlik | Kasiyer ekranındaki blokaj uyarısı, kasiyerin görmesini kolaylaştıracak şekilde ekran alanının **en az %50'sini kaplayan** kırmızı bir modal pencere şeklinde olmalıdır. | **Should** | *Performans (Linear)* |
+| **NFR-07** | Kalite Güvence | Barkod ayrıştırma, tarih karşılaştırma ve indirim hesaplama motorlarının doğruluk (kesinlik) oranı **%99.99** seviyesinde olmalıdır. | **Must** | *Temel (Must-be)* |
 
 ---
 

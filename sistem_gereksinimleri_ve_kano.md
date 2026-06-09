@@ -68,40 +68,44 @@ Projenin teknik ve işlevsel sınırlarını belirlemek üzere hazırlanan gerek
 
 ### 3. KANO Model Analizi
 
-KANO modeli çerçevesinde, genişletilmiş gereksinim kataloğumuzdaki maddeler müşteri memnuniyeti üzerindeki etkilerine göre sınıflandırılmıştır:
+KANO modeli çerçevesinde, genişletilmiş gereksinim kataloğumuzdaki 7 temsilci ve kritik madde müşteri memnuniyeti üzerindeki etkilerine göre sınıflandırılmıştır:
 
 ```
                        YÜKSEK MEMNUNİYET
                                ^
                                |       / [Performans (Linear)]
-                               |      /  Sanal Market Tercihleri, İndirimler
-                               |     /   ve Son Şans Kategorisi
+                               |      /  Sanal Market Seçim Ekranı,
+                               |     /   Performans - Hız
                                |    /
   EKSİK İŞLEV -----------------+-----------------> TAM İŞLEV
  (Fark edilmez)                |  [Temel]        (Müşteri Memnun)
-  Tarihi Geçmiş                |  Kasa Engelleme & Manuel Bloke Kaldırma
-  Ürün Blokesi                 |
+  Barkod Çözümleme,            |  Doğruluk - Kesinlik, Güvenlik / KVKK
+                               |
                                |       * [Çekici (Delighter)]
-                               |         Money App Hatırlatma ve Yemek Tarifleri
+                               |         Money App Hatırlatma Bildirimi
                                v
                        DÜŞÜK MEMNUNİYET
 ```
 
 #### 3.1. Temel (Must-Be / Threshold) Gereksinimler
-Müşterinin "olmazsa olmaz" gördüğü, yokluğunda aşırı memnuniyetsizlik yaratan özelliklerdir.
-*   **FR-02 (Kasa Satış Blokajı / SKT Geçmiş Ürün Engellemesi):** Müşteri tarihi geçmiş ürünü almamayı en temel gıda güvenliği hakkı olarak görür.
-*   **FR-08 (Yetkili Manuel Bloke Kaldırma):** Yanlış okuma durumlarında müdür şifresiyle kasa kilidinin açılabilmesi sistemin mağaza içi kullanılabilirliği için temel gerekliliktir.
-*   **NFR-01 ve NFR-02 (Performans & Güvenilirlik):** Kasaların hızlı çalışması ve internet kesildiğinde sistemin durmaması operasyonun temel hijyen faktörüdür.
+Müşterinin "olmazsa olmaz" gördüğü, yokluğunda aşırı memnuniyetsizlik yaratan ancak varlığında ekstra memnuniyet üretmeyen temel altyapı özellikleridir.
+*   **FR-01 (Barkod Çözümleme ve SKT Okuma):** GS1-128 barkodlarının kasada okunarak son tüketim tarihinin otomatik ayrıştırılması sistemin çalışabilmesi için temel hijyen faktörüdür.
+*   **NFR-07 (Doğruluk ve Kesinlik):** Karar motorunun hata payının minimum düzeyde olması (%99.99 doğruluk) gerekir; aksi halde hatalı blokajlar ciddi operasyonel krizler yaratır.
+*   **NFR-03 (Güvenlik / KVKK):** Money Kart CRM veri aktarımlarının 256-bit AES ile şifrelenerek korunması yasal ve temel bir zorunluluktur.
+*   *Not:* Operasyonel güvenliği sağlayan Kasa Satış Blokajı (FR-02) ve Manuel Bloke Kaldırma (FR-08) gibi diğer temel işlevler de bu sınıftadır.
 
 #### 3.2. Performans (One-Dimensional / Linear) Gereksinimler
-Kullanıcıya ne kadar iyi sunulursa memnuniyeti o kadar doğrusal olarak artıran özelliklerdir.
-*   **FR-03 (Otomatik Dinamik İndirim) & FR-04 (Sanal Market SKT Seçeneği):** Müşterinin bütçe tasarrufu yapmasını ve ürün tarihini seçebilmesini sağlar.
-*   **FR-05 (Son Şans Kategorisi):** Müşterilerin israftan kurtarılacak ürünleri tek bir sekmede yüksek indirimle görebilmesi doğrusal memnuniyet yaratır.
+Kullanıcıya ne kadar iyi ve kaliteli sunulursa memnuniyeti o kadar doğrusal olarak artıran, zayıf uygulandığında ise memnuniyeti düşüren özelliklerdir.
+*   **FR-04 (Sanal Market Seçim Ekranı):** Müşterinin sepet ekranında standart ürün yerine indirimli yakın tarih seçeneğini tercih edebilmesi ve bu seçeneğin kalitesi doğrusal memnuniyet yaratır.
+*   **NFR-01 (Performans / Hız):** Kasadaki doğrulama ve karar yansıma süresinin 150 ms altında olması kasa kuyruklarını önler ve memnuniyet seviyesini doğrudan artırır.
 
 #### 3.3. Çekici (Delighter / Attractive) Gereksinimler
-Müşterinin talep etmediği, yokluğunda şikayet etmediği ancak sunulduğunda markaya olan bağlılığını zirveye çıkaran özelliklerdir.
-*   **FR-06 (Money App Hatırlatma Bildirimi) & FR-07 (Akıllı Yemek Tarifi Önerileri):** Satın alınan ürünün evdeki dolapta bozulmasını engellemek için müşteriyi uyarmak ve ona özel tarifler (örn. kalan tavukla yapılacak pratik çorba tarifi) sunmak çok güçlü bir müşteri deneyimi sürprizidir ("wow" etkisi yaratır).
-*   **Fişte Bilgilendirme Metni:** Fişin altında satın alınan ürünün kalan ömrü hakkında bilgilendirme yapılması şeffaflığı artırır.
+Müşterinin talep etmediği, yokluğunda şikayet etmediği ancak sunulduğunda markaya olan bağlılığı ve memnuniyeti zirveye çıkaran sürpriz değer teklifleridir.
+*   **FR-06 (Money App Hatırlatma Bildirimi):** Satın alınan ürünlerin SKT'sine 1 gün kala Money App üzerinden gönderilen otomatik push uyarısı müşteri için beklenmedik, proaktif bir "wow" etkisi yaratır.
+
+#### 3.4. Etkisiz (Indifferent) Gereksinimler
+Müşterinin doğrudan fark etmediği, varlığının veya yokluğunun müşteri memnuniyeti üzerinde herhangi bir olumlu veya olumsuz etki yapmadığı teknik kararlardır.
+*   **INF-01 (SKT Verilerinin Analiz Amaçlı Depolanması):** Geçmişe dönük fire takibi ve stok optimizasyonu için verilerin arka planda depolanması müşteri deneyimini doğrudan etkilemez.
 
 ---
 
